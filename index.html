@@ -4,23 +4,265 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Voltify</title>
+
+  <!-- Pixel font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
   <style>
-    body{margin:0;font-family:Arial, sans-serif;background:#0b0f19;color:#fff;display:grid;place-items:center;min-height:100vh}
-    .card{max-width:720px;padding:32px;border:1px solid rgba(255,255,255,.12);border-radius:18px;background:rgba(255,255,255,.06)}
-    a{color:#7dd3fc;text-decoration:none}
-    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}
-    .btn{display:block;padding:12px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.08)}
+    :root{
+      --bg:#06080c;
+      --panel: rgba(255,255,255,.03);
+      --text:#e9eef7;
+      --muted: rgba(233,238,247,.55);
+      --green:#18ff9a;
+      --green2:#00d37b;
+      --shadow: 0 18px 60px rgba(0,0,0,.7);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:
+        radial-gradient(900px 500px at 50% 40%, rgba(255,255,255,.05), transparent 60%),
+        radial-gradient(600px 320px at 65% 55%, rgba(24,255,154,.06), transparent 65%),
+        radial-gradient(600px 320px at 35% 55%, rgba(24,255,154,.03), transparent 65%),
+        linear-gradient(180deg, #03050a 0%, #05070b 60%, #03050a 100%);
+      color:var(--text);
+      font-family: "Press Start 2P", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      overflow:hidden;
+    }
+
+    .wrap{
+      min-height:100%;
+      display:grid;
+      place-items:center;
+      padding:32px;
+    }
+
+    /* subtle vignette */
+    .vignette:before{
+      content:"";
+      position:fixed;
+      inset:-2px;
+      pointer-events:none;
+      background: radial-gradient(circle at 50% 45%, transparent 45%, rgba(0,0,0,.6) 90%);
+      opacity:.85;
+    }
+
+    .center{
+      width:min(880px, 92vw);
+      text-align:center;
+      position:relative;
+      z-index:1;
+      padding: 10px 0 0;
+    }
+
+    .title{
+      font-size: clamp(34px, 5vw, 72px);
+      letter-spacing: 2px;
+      text-shadow: 0 6px 0 rgba(0,0,0,.55);
+      margin:0;
+    }
+
+    .meta{
+      margin-top: 10px;
+      display:flex;
+      justify-content:center;
+      gap: 18px;
+      font-size: 10px;
+      color: var(--muted);
+    }
+    .meta .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .dot{
+      width:6px;height:6px;border-radius:50%;
+      background: var(--green);
+      box-shadow: 0 0 16px rgba(24,255,154,.7);
+    }
+    .green{
+      color: var(--green);
+      text-shadow: 0 0 14px rgba(24,255,154,.45);
+    }
+
+    .search{
+      margin: 22px auto 14px;
+      width:min(740px, 92vw);
+      position:relative;
+    }
+
+    .search input{
+      width:100%;
+      padding: 18px 18px;
+      border-radius: 14px;
+      border: 2px solid rgba(24,255,154,.35);
+      outline:none;
+      background: rgba(0,0,0,.28);
+      color: rgba(233,238,247,.85);
+      font-family: inherit;
+      font-size: 12px;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.4), 0 0 26px rgba(24,255,154,.10);
+    }
+    .search input::placeholder{
+      color: rgba(233,238,247,.35);
+    }
+    .search input:focus{
+      border-color: rgba(24,255,154,.65);
+      box-shadow: 0 0 0 2px rgba(24,255,154,.12), 0 0 34px rgba(24,255,154,.18);
+    }
+
+    .stats{
+      margin-top: 10px;
+      display:flex;
+      justify-content:center;
+      gap: 26px;
+      font-size: 10px;
+      color: rgba(233,238,247,.45);
+    }
+    .stats b{
+      color: var(--green);
+      font-weight: 400;
+    }
+
+    /* Right dock */
+    .dock{
+      position:fixed;
+      top: 50%;
+      right: 22px;
+      transform: translateY(-50%);
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+      z-index: 3;
+    }
+    .dock a{
+      width: 44px;
+      height: 44px;
+      display:grid;
+      place-items:center;
+      border-radius: 14px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: var(--shadow);
+      color: rgba(233,238,247,.55);
+      text-decoration:none;
+      transition: .15s ease;
+      user-select:none;
+    }
+    .dock a:hover{
+      transform: translateY(-1px);
+      border-color: rgba(24,255,154,.25);
+      color: var(--green);
+      box-shadow: 0 18px 60px rgba(0,0,0,.7), 0 0 26px rgba(24,255,154,.12);
+    }
+    .dock a.active{
+      color: var(--green);
+      border-color: rgba(24,255,154,.35);
+    }
+
+    /* tiny footer version under title like the screenshot */
+    .version{
+      margin-top: 10px;
+      font-size: 10px;
+      color: rgba(233,238,247,.35);
+    }
   </style>
 </head>
-<body>
-  <div class="card">
-    <h1>⚡ Voltify</h1>
-    <p>Games + Movies made by Me!</p>
 
-    <div class="grid">
-      <a class="btn" href="games.html">🎮 Games</a>
-      <a class="btn" href="movies.html">🎬 Movies</a>
-    </div>
+<body class="vignette">
+  <div class="wrap">
+    <main class="center" aria-label="Voltify Home">
+
+      <h1 class="title">VOLTIFY</h1>
+      <div class="version">v1.0.0</div>
+
+      <div class="meta">
+        <span class="pill"><span class="dot"></span><span id="timeText">--:--</span></span>
+        <span class="pill"><span class="green" id="batteryText">--%</span></span>
+      </div>
+
+      <div class="search">
+        <input id="searchInput" type="text" placeholder="Enter a URL or search Google" autocomplete="off" />
+      </div>
+
+      <div class="stats">
+        <span>TODAY <b id="statToday">3360</b></span>
+        <span>WEEK <b id="statWeek">8155</b></span>
+        <span>ALL <b id="statAll">70229</b></span>
+      </div>
+
+    </main>
   </div>
+
+  <!-- Right-side dock (you can change these links) -->
+  <nav class="dock" aria-label="Quick Dock">
+    <a class="active" href="index.html" title="Home">🏠</a>
+    <a href="games.html" title="Games">🎮</a>
+    <a href="movies.html" title="Movies">🎬</a>
+    <a href="about.html" title="About">👤</a>
+    <a href="#" id="settingsBtn" title="Settings">⚙️</a>
+  </nav>
+
+  <script>
+    // Time
+    function updateTime(){
+      const d = new Date();
+      let h = d.getHours();
+      const m = String(d.getMinutes()).padStart(2,'0');
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12; if (h === 0) h = 12;
+      document.getElementById('timeText').textContent = `${h}:${m} ${ampm}`;
+    }
+    updateTime();
+    setInterval(updateTime, 1000);
+
+    // Battery (works in some browsers; fallback if not supported)
+    async function updateBattery(){
+      const el = document.getElementById('batteryText');
+      try{
+        if (!('getBattery' in navigator)) {
+          el.textContent = '100%';
+          return;
+        }
+        const b = await navigator.getBattery();
+        const set = () => el.textContent = Math.round(b.level * 100) + '%';
+        set();
+        b.addEventListener('levelchange', set);
+        b.addEventListener('chargingchange', set);
+      } catch {
+        el.textContent = '100%';
+      }
+    }
+    updateBattery();
+
+    // Search bar behavior: enter opens google search or a URL
+    const input = document.getElementById('searchInput');
+    input.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      const q = input.value.trim();
+      if (!q) return;
+
+      // If it looks like a URL, open it. Otherwise Google search.
+      const looksLikeUrl =
+        q.includes('.') && !q.includes(' ') && !q.startsWith('?');
+
+      const url = looksLikeUrl
+        ? (q.startsWith('http') ? q : 'https://' + q)
+        : 'https://www.google.com/search?q=' + encodeURIComponent(q);
+
+      window.location.href = url;
+    });
+
+    // Settings button (placeholder)
+    document.getElementById('settingsBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      alert('Settings coming soon ⚡');
+    });
+  </script>
 </body>
 </html>
