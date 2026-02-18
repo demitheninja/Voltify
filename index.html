@@ -5,211 +5,457 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Voltify</title>
 
-  <!-- Pixel font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --bg:#06080c;
-      --panel: rgba(255,255,255,.03);
-      --text:#e9eef7;
-      --muted: rgba(233,238,247,.55);
-      --green:#18ff9a;
-      --green2:#00d37b;
-      --shadow: 0 18px 60px rgba(0,0,0,.7);
+      --bg0:#070A12;
+      --bg1:#0B1020;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.10);
+      --text:#EAF0FF;
+      --muted: rgba(234,240,255,.62);
+      --accent:#7C3AED;     /* purple */
+      --accent2:#22C55E;    /* green */
+      --ring: rgba(124,58,237,.35);
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
+      --radius: 18px;
     }
 
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;
-      background:
-        radial-gradient(900px 500px at 50% 40%, rgba(255,255,255,.05), transparent 60%),
-        radial-gradient(600px 320px at 65% 55%, rgba(24,255,154,.06), transparent 65%),
-        radial-gradient(600px 320px at 35% 55%, rgba(24,255,154,.03), transparent 65%),
-        linear-gradient(180deg, #03050a 0%, #05070b 60%, #03050a 100%);
+      font-family:"Space Grotesk", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--text);
-      font-family: "Press Start 2P", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      overflow:hidden;
+      background:
+        radial-gradient(1200px 600px at 20% 10%, color-mix(in oklab, var(--accent) 18%, transparent), transparent 60%),
+        radial-gradient(900px 500px at 85% 20%, color-mix(in oklab, var(--accent2) 14%, transparent), transparent 55%),
+        radial-gradient(900px 700px at 50% 80%, rgba(255,255,255,.06), transparent 60%),
+        linear-gradient(180deg, var(--bg0) 0%, var(--bg1) 100%);
+      overflow-x:hidden;
     }
 
-    .wrap{
-      min-height:100%;
-      display:grid;
-      place-items:center;
-      padding:32px;
-    }
-
-    /* subtle vignette */
-    .vignette:before{
-      content:"";
+    /* subtle animated “energy lines” background */
+    .energy{
       position:fixed;
       inset:-2px;
       pointer-events:none;
-      background: radial-gradient(circle at 50% 45%, transparent 45%, rgba(0,0,0,.6) 90%);
-      opacity:.85;
+      opacity:.55;
+      background:
+        repeating-linear-gradient(90deg, rgba(255,255,255,.04) 0 1px, transparent 1px 60px),
+        repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 1px, transparent 1px 60px);
+      mask-image: radial-gradient(circle at 50% 35%, black 0%, transparent 68%);
+      animation: drift 10s linear infinite;
+    }
+    @keyframes drift{
+      from{transform:translate3d(0,0,0)}
+      to{transform:translate3d(-60px, -60px, 0)}
     }
 
-    .center{
-      width:min(880px, 92vw);
-      text-align:center;
-      position:relative;
-      z-index:1;
-      padding: 10px 0 0;
+    /* Top bar */
+    header{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter: blur(12px);
+      background: linear-gradient(180deg, rgba(10,12,20,.82), rgba(10,12,20,.45));
+      border-bottom:1px solid rgba(255,255,255,.10);
     }
-
-    .title{
-      font-size: clamp(34px, 5vw, 72px);
-      letter-spacing: 2px;
-      text-shadow: 0 6px 0 rgba(0,0,0,.55);
-      margin:0;
-    }
-
-    .meta{
-      margin-top: 10px;
+    .topbar{
+      max-width:1100px;
+      margin:0 auto;
+      padding:12px 16px;
       display:flex;
-      justify-content:center;
-      gap: 18px;
-      font-size: 10px;
-      color: var(--muted);
+      align-items:center;
+      gap:12px;
     }
-    .meta .pill{
-      display:inline-flex;
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:700;
+      letter-spacing:.4px;
+    }
+    .bolt{
+      width:34px;height:34px;border-radius:12px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.35), transparent 55%),
+                  linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 0 0 1px rgba(255,255,255,.18), 0 18px 50px rgba(0,0,0,.45);
+      display:grid;
+      place-items:center;
+      font-size:18px;
+    }
+    nav{
+      margin-left:auto;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .navbtn{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      padding:9px 12px;
+      border-radius:14px;
+      text-decoration:none;
+      font-weight:600;
+      font-size:14px;
+      transition:.15s ease;
+    }
+    .navbtn:hover{
+      transform: translateY(-1px);
+      border-color: color-mix(in oklab, var(--accent) 40%, rgba(255,255,255,.12));
+      box-shadow: 0 0 0 3px var(--ring);
+    }
+
+    .wrap{
+      max-width:1100px;
+      margin:0 auto;
+      padding:28px 16px 40px;
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap:16px;
+      align-items:stretch;
+      margin-top:16px;
+    }
+    @media (max-width: 900px){
+      .hero{grid-template-columns:1fr}
+    }
+
+    .card{
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background: radial-gradient(800px 240px at 20% 0%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 60%),
+                  radial-gradient(800px 240px at 80% 0%, color-mix(in oklab, var(--accent2) 18%, transparent), transparent 60%);
+      opacity:.7;
+      pointer-events:none;
+    }
+    .card > *{position:relative; z-index:1}
+
+    .mainCard{
+      padding:22px;
+      min-height: 320px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+    .title{
+      margin:0;
+      font-size: clamp(34px, 4vw, 56px);
+      line-height:1.05;
+      letter-spacing:-.5px;
+    }
+    .subtitle{
+      margin:0;
+      color:var(--muted);
+      font-size: 16px;
+    }
+
+    .searchRow{
+      margin-top:8px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .searchRow input{
+      flex:1;
+      padding: 14px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      outline:none;
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      font-size: 15px;
+    }
+    .searchRow input:focus{
+      border-color: color-mix(in oklab, var(--accent) 55%, rgba(255,255,255,.14));
+      box-shadow: 0 0 0 4px var(--ring);
+    }
+    .go{
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: linear-gradient(135deg, color-mix(in oklab, var(--accent) 80%, #000), color-mix(in oklab, var(--accent2) 70%, #000));
+      color: white;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .quickGrid{
+      margin-top:auto;
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:10px;
+    }
+    .tile{
+      padding:14px;
+      border-radius: 16px;
+      background: rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.12);
+      text-decoration:none;
+      color:var(--text);
+      transition:.15s ease;
+    }
+    .tile:hover{
+      transform: translateY(-2px);
+      border-color: color-mix(in oklab, var(--accent) 40%, rgba(255,255,255,.12));
+      box-shadow: 0 0 0 4px var(--ring);
+    }
+    .tile b{display:block;font-size:16px}
+    .tile small{color:var(--muted)}
+
+    .sideCard{
+      padding:18px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .badgeRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .badge{
+      padding:10px 12px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.22);
+      border:1px solid rgba(255,255,255,.12);
+      color: var(--muted);
+      font-size: 13px;
+      display:flex;
       align-items:center;
       gap:8px;
     }
     .dot{
-      width:6px;height:6px;border-radius:50%;
-      background: var(--green);
-      box-shadow: 0 0 16px rgba(24,255,154,.7);
-    }
-    .green{
-      color: var(--green);
-      text-shadow: 0 0 14px rgba(24,255,154,.45);
+      width:8px;height:8px;border-radius:50%;
+      background: var(--accent2);
+      box-shadow: 0 0 18px color-mix(in oklab, var(--accent2) 50%, transparent);
     }
 
-    .search{
-      margin: 22px auto 14px;
-      width:min(740px, 92vw);
-      position:relative;
+    .bigNum{
+      font-size: 34px;
+      font-weight:800;
+      letter-spacing:-.5px;
+      color: var(--text);
+      margin-top:2px;
     }
 
-    .search input{
-      width:100%;
-      padding: 18px 18px;
-      border-radius: 14px;
-      border: 2px solid rgba(24,255,154,.35);
-      outline:none;
-      background: rgba(0,0,0,.28);
-      color: rgba(233,238,247,.85);
-      font-family: inherit;
-      font-size: 12px;
-      box-shadow: 0 0 0 1px rgba(0,0,0,.4), 0 0 26px rgba(24,255,154,.10);
-    }
-    .search input::placeholder{
-      color: rgba(233,238,247,.35);
-    }
-    .search input:focus{
-      border-color: rgba(24,255,154,.65);
-      box-shadow: 0 0 0 2px rgba(24,255,154,.12), 0 0 34px rgba(24,255,154,.18);
-    }
-
-    .stats{
-      margin-top: 10px;
-      display:flex;
-      justify-content:center;
-      gap: 26px;
-      font-size: 10px;
-      color: rgba(233,238,247,.45);
-    }
-    .stats b{
-      color: var(--green);
-      font-weight: 400;
-    }
-
-    /* Right dock */
-    .dock{
-      position:fixed;
-      top: 50%;
-      right: 22px;
-      transform: translateY(-50%);
-      display:flex;
-      flex-direction:column;
-      gap: 12px;
-      z-index: 3;
-    }
-    .dock a{
-      width: 44px;
-      height: 44px;
-      display:grid;
+    /* Settings modal */
+    .modalBack{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      display:none;
       place-items:center;
-      border-radius: 14px;
-      background: rgba(255,255,255,.03);
-      border: 1px solid rgba(255,255,255,.08);
+      padding:16px;
+      z-index:99;
+    }
+    .modal{
+      width: min(720px, 96vw);
+      border-radius: 20px;
+      background: rgba(10,12,20,.90);
+      border:1px solid rgba(255,255,255,.14);
       box-shadow: var(--shadow);
-      color: rgba(233,238,247,.55);
-      text-decoration:none;
-      transition: .15s ease;
-      user-select:none;
+      overflow:hidden;
     }
-    .dock a:hover{
-      transform: translateY(-1px);
-      border-color: rgba(24,255,154,.25);
-      color: var(--green);
-      box-shadow: 0 18px 60px rgba(0,0,0,.7), 0 0 26px rgba(24,255,154,.12);
+    .modalHead{
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border-bottom:1px solid rgba(255,255,255,.10);
     }
-    .dock a.active{
-      color: var(--green);
-      border-color: rgba(24,255,154,.35);
+    .modalHead b{font-size:16px}
+    .close{
+      cursor:pointer;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 12px;
+      font-weight:700;
     }
+    .modalBody{
+      padding:16px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+    }
+    @media (max-width: 760px){ .modalBody{grid-template-columns:1fr} }
 
-    /* tiny footer version under title like the screenshot */
-    .version{
-      margin-top: 10px;
-      font-size: 10px;
-      color: rgba(233,238,247,.35);
+    .setCard{
+      border:1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      background: rgba(255,255,255,.05);
+      padding:14px;
     }
+    .setCard h3{margin:0 0 8px; font-size:14px}
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .preset{
+      cursor:pointer;
+      padding:10px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      font-weight:700;
+      font-size: 13px;
+    }
+    .preset:hover{box-shadow:0 0 0 4px var(--ring)}
+    .picker{
+      display:flex; align-items:center; gap:10px;
+      margin-top:10px;
+    }
+    .picker label{color: var(--muted); font-size:13px}
+    input[type="color"]{
+      width:46px;height:34px;border:0;background:transparent; padding:0;
+    }
+    .smallNote{color: var(--muted); font-size:12px; margin-top:10px; line-height:1.4}
   </style>
 </head>
 
-<body class="vignette">
+<body>
+  <div class="energy"></div>
+
+  <header>
+    <div class="topbar">
+      <div class="brand">
+        <div class="bolt">⚡</div>
+        <div>Voltify</div>
+      </div>
+
+      <nav>
+        <a class="navbtn" href="index.html">Home</a>
+        <a class="navbtn" href="games.html">Games</a>
+        <a class="navbtn" href="movies.html">Movies</a>
+        <a class="navbtn" href="#" id="openSettings">Settings</a>
+      </nav>
+    </div>
+  </header>
+
   <div class="wrap">
-    <main class="center" aria-label="Voltify Home">
+    <section class="hero">
+      <div class="card">
+        <div class="mainCard">
+          <h1 class="title">Your crew’s hub ⚡</h1>
+          <p class="subtitle">Games + movies made by you & your friends. Clean, fast, and your own vibe.</p>
 
-      <h1 class="title">VOLTIFY</h1>
-      <div class="version">v1.0.0</div>
+          <div class="searchRow">
+            <input id="searchInput" placeholder="Search Google or type a URL..." autocomplete="off" />
+            <button class="go" id="goBtn">Go</button>
+          </div>
 
-      <div class="meta">
-        <span class="pill"><span class="dot"></span><span id="timeText">--:--</span></span>
-        <span class="pill"><span class="green" id="batteryText">--%</span></span>
+          <div class="quickGrid">
+            <a class="tile" href="games.html">
+              <b>🎮 Games</b>
+              <small>Play your stuff</small>
+            </a>
+            <a class="tile" href="movies.html">
+              <b>🎬 Movies</b>
+              <small>Watch your films</small>
+            </a>
+          </div>
+        </div>
       </div>
 
-      <div class="search">
-        <input id="searchInput" type="text" placeholder="Enter a URL or search Google" autocomplete="off" />
-      </div>
+      <div class="card">
+        <div class="sideCard">
+          <div class="badgeRow">
+            <div class="badge"><span class="dot"></span><span id="timeText">--:--</span></div>
+            <div class="badge">Visitors: <b id="visitorCount">--</b></div>
+          </div>
 
-      <div class="stats">
-        <span>TODAY <b id="statToday">3360</b></span>
-        <span>WEEK <b id="statWeek">8155</b></span>
-        <span>ALL <b id="statAll">70229</b></span>
-      </div>
+          <div style="margin-top:6px;color:var(--muted);font-weight:600;">Status</div>
+          <div class="bigNum" id="statusText">ONLINE</div>
 
-    </main>
+          <div class="smallNote">
+            Tip: Add your movies by embedding YouTube (unlisted) or Drive links on <b>movies.html</b>.
+            That keeps it fast and doesn’t break free hosting limits.
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 
-  <!-- Right-side dock (you can change these links) -->
-  <nav class="dock" aria-label="Quick Dock">
-    <a class="active" href="index.html" title="Home">🏠</a>
-    <a href="games.html" title="Games">🎮</a>
-    <a href="movies.html" title="Movies">🎬</a>
-    <a href="about.html" title="About">👤</a>
-    <a href="#" id="settingsBtn" title="Settings">⚙️</a>
-  </nav>
+  <!-- Settings Modal -->
+  <div class="modalBack" id="modalBack" role="dialog" aria-modal="true" aria-label="Settings">
+    <div class="modal">
+      <div class="modalHead">
+        <b>⚙️ Voltify Settings</b>
+        <button class="close" id="closeSettings">Close</button>
+      </div>
+
+      <div class="modalBody">
+        <div class="setCard">
+          <h3>Theme Presets</h3>
+          <div class="row">
+            <button class="preset" data-theme="neon">Neon</button>
+            <button class="preset" data-theme="ocean">Ocean</button>
+            <button class="preset" data-theme="ember">Ember</button>
+            <button class="preset" data-theme="mono">Mono</button>
+          </div>
+
+          <div class="picker">
+            <label>Accent</label>
+            <input type="color" id="accentPicker" />
+            <label>Accent 2</label>
+            <input type="color" id="accent2Picker" />
+          </div>
+
+          <div class="smallNote">
+            Presets change everything instantly. The color pickers let you fine-tune the 2 main colors.
+          </div>
+        </div>
+
+        <div class="setCard">
+          <h3>Visitor Counter</h3>
+          <div class="smallNote">
+            ✅ <b>Real global count</b> uses a free counter API (counts everyone).<br>
+            ⚠️ If it ever fails, the site auto-falls back to a <b>local</b> counter (only your device).
+          </div>
+          <div class="smallNote" style="margin-top:10px">
+            You can change the counter “key” in the script to anything (example: <b>voltify-main</b>).
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script>
-    // Time
+    // ---------- Search ----------
+    function runSearch() {
+      const q = document.getElementById('searchInput').value.trim();
+      if (!q) return;
+
+      const looksLikeUrl = q.includes('.') && !q.includes(' ') && !q.startsWith('?');
+      const url = looksLikeUrl
+        ? (q.startsWith('http') ? q : 'https://' + q)
+        : 'https://www.google.com/search?q=' + encodeURIComponent(q);
+
+      window.open(url, '_blank', 'noopener');
+    }
+    document.getElementById('goBtn').addEventListener('click', runSearch);
+    document.getElementById('searchInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') runSearch();
+    });
+
+    // ---------- Time ----------
     function updateTime(){
       const d = new Date();
       let h = d.getHours();
@@ -221,48 +467,136 @@
     updateTime();
     setInterval(updateTime, 1000);
 
-    // Battery (works in some browsers; fallback if not supported)
-    async function updateBattery(){
-      const el = document.getElementById('batteryText');
+    // ---------- Themes ----------
+    const themes = {
+      neon:  { accent:'#7C3AED', accent2:'#22C55E', bg0:'#070A12', bg1:'#0B1020' },
+      ocean: { accent:'#06B6D4', accent2:'#3B82F6', bg0:'#041018', bg1:'#061A2B' },
+      ember: { accent:'#F97316', accent2:'#EF4444', bg0:'#120707', bg1:'#1D0B0B' },
+      mono:  { accent:'#A3A3A3', accent2:'#E5E7EB', bg0:'#070707', bg1:'#111111' },
+    };
+
+    function applyTheme(t){
+      const r = document.documentElement;
+      r.style.setProperty('--accent', t.accent);
+      r.style.setProperty('--accent2', t.accent2);
+      r.style.setProperty('--bg0', t.bg0);
+      r.style.setProperty('--bg1', t.bg1);
+      r.style.setProperty('--ring', `rgba(${hexToRgb(t.accent).join(',')}, .35)`);
+    }
+
+    function hexToRgb(hex){
+      const h = hex.replace('#','').trim();
+      const full = h.length === 3 ? h.split('').map(c=>c+c).join('') : h;
+      const n = parseInt(full, 16);
+      return [(n>>16)&255, (n>>8)&255, n&255];
+    }
+
+    function saveThemeState(state){
+      localStorage.setItem('voltify_theme', JSON.stringify(state));
+    }
+    function loadThemeState(){
       try{
-        if (!('getBattery' in navigator)) {
-          el.textContent = '100%';
-          return;
-        }
-        const b = await navigator.getBattery();
-        const set = () => el.textContent = Math.round(b.level * 100) + '%';
-        set();
-        b.addEventListener('levelchange', set);
-        b.addEventListener('chargingchange', set);
-      } catch {
-        el.textContent = '100%';
+        return JSON.parse(localStorage.getItem('voltify_theme') || 'null');
+      }catch{ return null; }
+    }
+
+    // Init theme from saved state
+    const saved = loadThemeState();
+    if (saved?.preset && themes[saved.preset]) {
+      applyTheme(themes[saved.preset]);
+      if (saved.customAccent) document.documentElement.style.setProperty('--accent', saved.customAccent);
+      if (saved.customAccent2) document.documentElement.style.setProperty('--accent2', saved.customAccent2);
+    } else {
+      applyTheme(themes.neon);
+    }
+
+    // Sync pickers with current theme
+    function currentVar(name){
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+    const accentPicker = document.getElementById('accentPicker');
+    const accent2Picker = document.getElementById('accent2Picker');
+    accentPicker.value = rgbToHex(currentVar('--accent'));
+    accent2Picker.value = rgbToHex(currentVar('--accent2'));
+
+    function rgbToHex(v){
+      // if already hex, return it
+      if (v.startsWith('#')) return v;
+      const m = v.match(/(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+      if (!m) return '#7C3AED';
+      const [r,g,b] = [Number(m[1]),Number(m[2]),Number(m[3])];
+      return '#' + [r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');
+    }
+
+    document.querySelectorAll('.preset').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const key = btn.dataset.theme;
+        applyTheme(themes[key]);
+        // update ring after preset
+        document.documentElement.style.setProperty('--ring', `rgba(${hexToRgb(themes[key].accent).join(',')}, .35)`);
+
+        accentPicker.value = themes[key].accent;
+        accent2Picker.value = themes[key].accent2;
+
+        saveThemeState({ preset:key, customAccent:themes[key].accent, customAccent2:themes[key].accent2 });
+      });
+    });
+
+    function applyCustomColors(){
+      const a1 = accentPicker.value;
+      const a2 = accent2Picker.value;
+      document.documentElement.style.setProperty('--accent', a1);
+      document.documentElement.style.setProperty('--accent2', a2);
+      document.documentElement.style.setProperty('--ring', `rgba(${hexToRgb(a1).join(',')}, .35)`);
+
+      const last = loadThemeState() || { preset:'custom' };
+      saveThemeState({ ...last, preset:last.preset || 'custom', customAccent:a1, customAccent2:a2 });
+    }
+    accentPicker.addEventListener('input', applyCustomColors);
+    accent2Picker.addEventListener('input', applyCustomColors);
+
+    // ---------- Settings modal ----------
+    const modalBack = document.getElementById('modalBack');
+    document.getElementById('openSettings').addEventListener('click', (e)=>{
+      e.preventDefault();
+      modalBack.style.display = 'grid';
+    });
+    document.getElementById('closeSettings').addEventListener('click', ()=>{
+      modalBack.style.display = 'none';
+    });
+    modalBack.addEventListener('click', (e)=>{
+      if (e.target === modalBack) modalBack.style.display = 'none';
+    });
+
+    // ---------- Visitor Counter ----------
+    // Option A (REAL global visitors): CountAPI (free, simple). Uses a "namespace" + "key".
+    // Change these to your own so you don't collide with other people.
+    const COUNT_NAMESPACE = 'demitheninja-voltify'; // change if you want
+    const COUNT_KEY = 'home';
+
+    // Option B (fallback): local-only counter
+    function localCount(){
+      const k = 'voltify_local_visits';
+      const v = Number(localStorage.getItem(k) || '0') + 1;
+      localStorage.setItem(k, String(v));
+      return v;
+    }
+
+    async function updateVisitorCount(){
+      const el = document.getElementById('visitorCount');
+      try{
+        // increments & returns { value: number }
+        const url = `https://api.countapi.xyz/hit/${encodeURIComponent(COUNT_NAMESPACE)}/${encodeURIComponent(COUNT_KEY)}`;
+        const r = await fetch(url, { cache:'no-store' });
+        if (!r.ok) throw new Error('bad response');
+        const data = await r.json();
+        el.textContent = data.value.toLocaleString();
+      } catch (err){
+        // fallback: local
+        el.textContent = localCount().toLocaleString();
       }
     }
-    updateBattery();
-
-    // Search bar behavior: enter opens google search or a URL
-    const input = document.getElementById('searchInput');
-    input.addEventListener('keydown', (e) => {
-      if (e.key !== 'Enter') return;
-      const q = input.value.trim();
-      if (!q) return;
-
-      // If it looks like a URL, open it. Otherwise Google search.
-      const looksLikeUrl =
-        q.includes('.') && !q.includes(' ') && !q.startsWith('?');
-
-      const url = looksLikeUrl
-        ? (q.startsWith('http') ? q : 'https://' + q)
-        : 'https://www.google.com/search?q=' + encodeURIComponent(q);
-
-      window.location.href = url;
-    });
-
-    // Settings button (placeholder)
-    document.getElementById('settingsBtn').addEventListener('click', (e) => {
-      e.preventDefault();
-      alert('Settings coming soon ⚡');
-    });
+    updateVisitorCount();
   </script>
 </body>
 </html>
