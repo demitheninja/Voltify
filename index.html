@@ -56,6 +56,21 @@
       to{transform:translate3d(-60px, -60px, 0)}
     }
 
+    /* Loading Screen Animation */
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
+    }
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+
     /* Top bar */
     header{
       position:sticky;
@@ -169,7 +184,7 @@
       font-size: 16px;
     }
 
-    /* NEW: Proxy toggle buttons */
+    /* Proxy toggle buttons */
     .searchMode {
       display: flex;
       gap: 10px;
@@ -363,6 +378,86 @@
 </head>
 
 <body>
+  <!-- LOADING SCREEN - Voltify Style -->
+  <div id="loadingScreen" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #070A12;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.5s ease;
+  ">
+    <!-- Animated spinner -->
+    <div style="
+      width: 80px;
+      height: 80px;
+      border: 4px solid rgba(124, 58, 237, 0.2);
+      border-top: 4px solid #7C3AED;
+      border-right: 4px solid #22C55E;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 30px;
+    "></div>
+    
+    <!-- Voltify logo text with gradient -->
+    <div style="
+      font-size: 32px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #7C3AED, #22C55E);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 15px;
+      letter-spacing: 2px;
+    ">⚡ VOLTIFY</div>
+    
+    <!-- Random loading message -->
+    <div style="
+      color: rgba(234, 240, 255, 0.8);
+      font-size: 16px;
+      letter-spacing: 3px;
+      margin-bottom: 25px;
+      animation: pulse 2s infinite;
+    " id="loadingText">LOADING</div>
+    
+    <!-- Bouncing dots -->
+    <div style="
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    ">
+      <span style="
+        width: 10px;
+        height: 10px;
+        background: #7C3AED;
+        border-radius: 50%;
+        animation: bounce 1.4s infinite ease-in-out both;
+        animation-delay: -0.32s;
+      "></span>
+      <span style="
+        width: 10px;
+        height: 10px;
+        background: #22C55E;
+        border-radius: 50%;
+        animation: bounce 1.4s infinite ease-in-out both;
+        animation-delay: -0.16s;
+      "></span>
+      <span style="
+        width: 10px;
+        height: 10px;
+        background: #7C3AED;
+        border-radius: 50%;
+        animation: bounce 1.4s infinite ease-in-out both;
+      "></span>
+    </div>
+  </div>
+
   <div class="energy"></div>
 
   <header>
@@ -388,14 +483,14 @@
           <h1 class="title">Voltify⚡</h1>
           <p class="subtitle">Games, Movies, And Proxies Made For You.</p>
 
-          <!-- NEW: Proxy toggle buttons -->
+          <!-- Proxy toggle buttons -->
           <div class="searchMode">
             <button class="modeBtn active" id="normalMode">🔍 Normal Search</button>
             <button class="modeBtn" id="proxyMode">🛡️ Proxy Mode</button>
           </div>
 
           <div class="searchRow">
-            <input id="searchInput" placeholder="Search Google, type a URL, or enter site to proxy..." autocomplete="off" />
+            <input id="searchInput" placeholder="Search Google or type a URL..." autocomplete="off" />
             <button class="go" id="goBtn">Go</button>
           </div>
 
@@ -423,7 +518,8 @@
 <div class="bigNum" id="statusText">Active!</div>
 
           <div class="smallNote">
-            Tip: Don't Introduce The Site By Saying "Check Out (My Name)'s Site! Please say Voltify       </div>
+            Tip: Don't Introduce The Site By Saying "Check Out (My Name)'s Site! Please say Voltify
+          </div>
         </div>
       </div>
     </section>
@@ -470,6 +566,38 @@
   </div>
 
   <script>
+    // ========== LOADING SCREEN ==========
+    const loadingMessages = [
+      "CHARGING UP...",
+      "SPARKING CONNECTION...",
+      "VOLTIFYING...",
+      "GATHERING ELECTRONS...",
+      "POWERING PROXY...",
+      "ZAPPING CONTENT...",
+      "ENERGIZING...",
+      "CONNECTING TO THE GRID...",
+      "⚡⚡⚡",
+      "WAKING THE BOLT...",
+      "HARNESSING LIGHTNING...",
+      "ACTIVATING SHIELD...",
+      "BOOSTING SIGNAL...",
+      "MAXIMUM OVERDRIVE..."
+    ];
+    
+    // Set random message
+    document.getElementById('loadingText').textContent = 
+      loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
+    
+    // Hide loading screen when page is fully loaded
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        document.getElementById('loadingScreen').style.opacity = '0';
+        setTimeout(function() {
+          document.getElementById('loadingScreen').style.display = 'none';
+        }, 500);
+      }, 1000); // Shows for 1 second so people can appreciate it
+    });
+
     // ========== PROXY INTEGRATION ==========
     let searchMode = 'normal'; // 'normal' or 'proxy'
     
@@ -526,8 +654,6 @@
     searchInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') runSearch();
     });
-    
-    // ========== END PROXY INTEGRATION ==========
 
     // ---------- Time ----------
     function updateTime(){
@@ -618,7 +744,7 @@
 
     function applyCustomColors(){
       const a1 = accentPicker.value;
-      const a2 = accentPicker.value;
+      const a2 = accent2Picker.value;
       document.documentElement.style.setProperty('--accent', a1);
       document.documentElement.style.setProperty('--accent2', a2);
       document.documentElement.style.setProperty('--ring', `rgba(${hexToRgb(a1).join(',')}, .35)`);
@@ -643,12 +769,9 @@
     });
 
     // ---------- Visitor Counter ----------
-    // Option A (REAL global visitors): CountAPI (free, simple). Uses a "namespace" + "key".
-    // Change these to your own so you don't collide with other people.
-    const COUNT_NAMESPACE = 'demitheninja-voltify'; // change if you want
+    const COUNT_NAMESPACE = 'voltify-' + Math.random().toString(36).substring(7);
     const COUNT_KEY = 'home';
 
-    // Option B (fallback): local-only counter
     function localCount(){
       const k = 'voltify_local_visits';
       const v = Number(localStorage.getItem(k) || '0') + 1;
@@ -659,14 +782,12 @@
     async function updateVisitorCount(){
       const el = document.getElementById('visitorCount');
       try{
-        // increments & returns { value: number }
         const url = `https://api.countapi.xyz/hit/${encodeURIComponent(COUNT_NAMESPACE)}/${encodeURIComponent(COUNT_KEY)}`;
         const r = await fetch(url, { cache:'no-store' });
         if (!r.ok) throw new Error('bad response');
         const data = await r.json();
         el.textContent = data.value.toLocaleString();
       } catch (err){
-        // fallback: local
         el.textContent = localCount().toLocaleString();
       }
     }
