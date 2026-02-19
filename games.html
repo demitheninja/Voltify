@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Voltify • Games</title>
+  <link rel="icon" type="image/png" href="logo.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg0:#070A12;
+      --bg1:#0B1020;
+      --panel: rgba(255,255,255,.06);
+      --text:#EAF0FF;
+      --muted: rgba(234,240,255,.62);
+      --accent:#7C3AED;
+      --accent2:#22C55E;
+      --ring: rgba(124,58,237,.35);
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
+      --radius: 18px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:"Space Grotesk", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% 10%, color-mix(in oklab, var(--accent) 18%, transparent), transparent 60%),
+        radial-gradient(900px 500px at 85% 20%, color-mix(in oklab, var(--accent2) 14%, transparent), transparent 55%),
+        linear-gradient(180deg, var(--bg0) 0%, var(--bg1) 100%);
+      min-height:100vh;
+    }
+
+    header{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter: blur(12px);
+      background: linear-gradient(180deg, rgba(10,12,20,.82), rgba(10,12,20,.45));
+      border-bottom:1px solid rgba(255,255,255,.10);
+    }
+    .topbar{
+      max-width:1100px; margin:0 auto;
+      padding:12px 16px;
+      display:flex; align-items:center; gap:12px;
+    }
+    .brand{display:flex; align-items:center; gap:10px; font-weight:700;}
+    .brand img{width:34px;height:34px;border-radius:12px}
+    nav{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;}
+    .navbtn{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      padding:9px 12px;
+      border-radius:14px;
+      text-decoration:none;
+      font-weight:600;
+      font-size:14px;
+      transition:.15s ease;
+    }
+    .navbtn:hover{transform:translateY(-1px); border-color: color-mix(in oklab, var(--accent) 40%, rgba(255,255,255,.12)); box-shadow:0 0 0 3px var(--ring);}
+    .navbtn.active{border-color: color-mix(in oklab, var(--accent2) 55%, rgba(255,255,255,.12));}
+
+    .wrap{max-width:1100px;margin:0 auto;padding:22px 16px 40px;}
+    .headRow{
+      display:flex; gap:12px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap;
+      margin-top:10px;
+    }
+    h1{margin:0; font-size:34px; letter-spacing:-.4px;}
+    .sub{margin:6px 0 0; color:var(--muted)}
+    .controls{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    .search{
+      padding:12px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      min-width: 260px;
+      outline:none;
+    }
+    .search:focus{border-color: color-mix(in oklab, var(--accent) 55%, rgba(255,255,255,.14)); box-shadow:0 0 0 4px var(--ring);}
+    .chip{
+      cursor:pointer;
+      padding:10px 12px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      font-weight:700;
+      font-size: 13px;
+      user-select:none;
+    }
+    .chip.active{border-color: color-mix(in oklab, var(--accent2) 55%, rgba(255,255,255,.12));}
+
+    .grid{
+      margin-top:16px;
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap:12px;
+    }
+    @media (max-width: 900px){ .grid{grid-template-columns: repeat(2, minmax(0,1fr));} }
+    @media (max-width: 560px){ .grid{grid-template-columns: 1fr;} }
+
+    .card{
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-height: 170px;
+    }
+    .tagRow{display:flex; gap:8px; flex-wrap:wrap}
+    .tag{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.20);
+      border:1px solid rgba(255,255,255,.10);
+      color: var(--muted);
+    }
+    .name{font-size:18px; font-weight:800; letter-spacing:-.2px}
+    .desc{color:var(--muted); font-size:14px; line-height:1.35}
+    .actions{margin-top:auto; display:flex; gap:10px; align-items:center; justify-content:space-between}
+    .play{
+      text-decoration:none;
+      padding:10px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: linear-gradient(135deg, color-mix(in oklab, var(--accent) 80%, #000), color-mix(in oklab, var(--accent2) 70%, #000));
+      color:white;
+      font-weight:800;
+    }
+    .play:hover{box-shadow:0 0 0 4px var(--ring);}
+    .meta{font-size:12px;color:rgba(234,240,255,.45)}
+
+    footer{
+      margin-top:18px;
+      color:rgba(234,240,255,.45);
+      font-size:12px;
+    }
+    code{background:rgba(0,0,0,.22);padding:2px 6px;border-radius:10px;border:1px solid rgba(255,255,255,.10)}
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="topbar">
+      <div class="brand">
+        <img src="logo.png" alt="Voltify Logo">
+        <div>Voltify</div>
+      </div>
+      <nav>
+        <a class="navbtn" href="index.html">Home</a>
+        <a class="navbtn active" href="games.html">Games</a>
+        <a class="navbtn" href="movies.html">Movies</a>
+        <a class="navbtn" href="#" id="openSettings">Settings</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="headRow">
+      <div>
+        <h1>🎮 Games</h1>
+        <p class="sub">Games Right At Your Use</p>
+      </div>
+
+      <div class="controls">
+        <input class="search" id="search" placeholder="Search games..." />
+        <div class="chip active" data-filter="all">All</div>
+        <div class="chip" data-filter="PVP">Arcade</div>
+        <div class="chip" data-filter="Puzzle">Puzzle</div>
+        <div class="chip" data-filter="Car">Multiplayer</div>
+      </div>
+    </div>
+
+ <div class="grid" id="grid">
+  <!-- PVP -->
+  <div class="card" data-tags="PVP">
+    <div class="tagRow">
+      <span class="tag">PVP</span>
+    </div>
+    <div class="name">Neon Arena</div>
+    <div class="desc">Fast 1v1 battle game.</div>
+    <div class="actions">
+      <a class="play" href="games/neon-arena/index.html">Play</a>
+      <div class="meta">HTML • Keyboard</div>
+    </div>
+  </div>
+
+  <!-- Puzzle -->
+  <div class="card" data-tags="Puzzle">
+    <div class="tagRow">
+      <span class="tag">Puzzle</span>
+    </div>
+    <div class="name">Hex Shift</div>
+    <div class="desc">Slide the tiles and solve the pattern.</div>
+    <div class="actions">
+      <a class="play" href="games/hex-shift/index.html">Play</a>
+      <div class="meta">HTML • Mouse</div>
+    </div>
+  </div>
+
+  <!-- Car -->
+  <div class="card" data-tags="Car">
+    <div class="tagRow">
+      <span class="tag">Car</span>
+    </div>
+    <div class="name">Street Drift</div>
+    <div class="desc">Top-down arcade driving game.</div>
+    <div class="actions">
+      <a class="play" href="games/street-drift/index.html">Play</a>
+      <div class="meta">HTML • Arrow Keys</div>
+    </div>
+  </div>
+</div>
+
+
+    <footer>
+      To add a game: create a folder like <code>games/my-game/</code> and put an <code>index.html</code> inside it, then set the “Play” link to it.
+    </footer>
+  </div>
+
+  <!-- Minimal Settings: link back to home settings -->
+  <script>
+    // Simple settings shortcut: go home and open settings
+    document.getElementById('openSettings').addEventListener('click', (e)=>{
+      e.preventDefault();
+      window.location.href = "index.html#settings";
+    });
+
+    // Filter + search
+    const chips = [...document.querySelectorAll('.chip')];
+    const cards = [...document.querySelectorAll('#grid .card')];
+    const search = document.getElementById('search');
+
+    let currentFilter = 'all';
+
+    function apply(){
+      const q = search.value.trim().toLowerCase();
+      for (const c of cards){
+        const tags = (c.getAttribute('data-tags') || '').toLowerCase();
+        const text = c.innerText.toLowerCase();
+        const matchesFilter = currentFilter === 'all' || tags.includes(currentFilter);
+        const matchesSearch = !q || text.includes(q);
+        c.style.display = (matchesFilter && matchesSearch) ? 'flex' : 'none';
+      }
+    }
+
+    chips.forEach(ch=>{
+      ch.addEventListener('click', ()=>{
+        chips.forEach(x=>x.classList.remove('active'));
+        ch.classList.add('active');
+        currentFilter = ch.dataset.filter;
+        apply();
+      });
+    });
+
+    search.addEventListener('input', apply);
+  </script>
+</body>
+</html>
