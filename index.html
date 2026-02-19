@@ -39,7 +39,7 @@
       overflow-x:hidden;
     }
 
-    /* subtle animated “energy lines” background */
+    /* subtle animated "energy lines" background */
     .energy{
       position:fixed;
       inset:-2px;
@@ -167,6 +167,37 @@
       margin:0;
       color:var(--muted);
       font-size: 16px;
+    }
+
+    /* NEW: Proxy toggle buttons */
+    .searchMode {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      background: rgba(0,0,0,.25);
+      padding: 6px;
+      border-radius: 40px;
+      width: fit-content;
+      border: 1px solid rgba(255,255,255,.1);
+    }
+    .modeBtn {
+      padding: 8px 16px;
+      border-radius: 30px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all .15s ease;
+    }
+    .modeBtn.active {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 4px 12px rgba(124,58,237,.3);
+    }
+    .modeBtn.proxyMode.active {
+      background: var(--accent2);
     }
 
     .searchRow{
@@ -357,8 +388,14 @@
           <h1 class="title">Voltify⚡</h1>
           <p class="subtitle">Games, Movies, And Proxies Made For You.</p>
 
+          <!-- NEW: Proxy toggle buttons -->
+          <div class="searchMode">
+            <button class="modeBtn active" id="normalMode">🔍 Normal Search</button>
+            <button class="modeBtn" id="proxyMode">🛡️ Proxy Mode</button>
+          </div>
+
           <div class="searchRow">
-            <input id="searchInput" placeholder="Search Google or type a URL..." autocomplete="off" />
+            <input id="searchInput" placeholder="Search Google, type a URL, or enter site to proxy..." autocomplete="off" />
             <button class="go" id="goBtn">Go</button>
           </div>
 
@@ -433,22 +470,64 @@
   </div>
 
   <script>
-    // ---------- Search ----------
+    // ========== PROXY INTEGRATION ==========
+    let searchMode = 'normal'; // 'normal' or 'proxy'
+    
+    // Get elements
+    const normalBtn = document.getElementById('normalMode');
+    const proxyBtn = document.getElementById('proxyMode');
+    const searchInput = document.getElementById('searchInput');
+    const goBtn = document.getElementById('goBtn');
+    
+    // Toggle mode buttons
+    normalBtn.addEventListener('click', () => {
+      searchMode = 'normal';
+      normalBtn.classList.add('active');
+      proxyBtn.classList.remove('active');
+      searchInput.placeholder = 'Search Google or type a URL...';
+    });
+    
+    proxyBtn.addEventListener('click', () => {
+      searchMode = 'proxy';
+      proxyBtn.classList.add('active');
+      normalBtn.classList.remove('active');
+      searchInput.placeholder = 'Enter site to proxy (e.g., google.com)';
+    });
+    
+    // Main search function
     function runSearch() {
-      const q = document.getElementById('searchInput').value.trim();
+      const q = searchInput.value.trim();
       if (!q) return;
-
-      const looksLikeUrl = q.includes('.') && !q.includes(' ') && !q.startsWith('?');
-      const url = looksLikeUrl
-        ? (q.startsWith('http') ? q : 'https://' + q)
-        : 'https://www.google.com/search?q=' + encodeURIComponent(q);
-
-      window.open(url, '_blank', 'noopener');
+      
+      if (searchMode === 'normal') {
+        // NORMAL SEARCH - original behavior
+        const looksLikeUrl = q.includes('.') && !q.includes(' ') && !q.startsWith('?');
+        const url = looksLikeUrl
+          ? (q.startsWith('http') ? q : 'https://' + q)
+          : 'https://www.google.com/search?q=' + encodeURIComponent(q);
+        
+        window.open(url, '_blank', 'noopener');
+      } else {
+        // PROXY MODE - use our Vercel proxy
+        let proxyUrl = q;
+        
+        // Add https:// if missing
+        if (!proxyUrl.startsWith('http://') && !proxyUrl.startsWith('https://')) {
+          proxyUrl = 'https://' + proxyUrl;
+        }
+        
+        // Open through our proxy
+        window.open('/api/proxy?url=' + encodeURIComponent(proxyUrl), '_blank', 'noopener');
+      }
     }
-    document.getElementById('goBtn').addEventListener('click', runSearch);
-    document.getElementById('searchInput').addEventListener('keydown', (e) => {
+    
+    // Event listeners
+    goBtn.addEventListener('click', runSearch);
+    searchInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') runSearch();
     });
+    
+    // ========== END PROXY INTEGRATION ==========
 
     // ---------- Time ----------
     function updateTime(){
@@ -539,7 +618,7 @@
 
     function applyCustomColors(){
       const a1 = accentPicker.value;
-      const a2 = accent2Picker.value;
+      const a2 = accentPicker.value;
       document.documentElement.style.setProperty('--accent', a1);
       document.documentElement.style.setProperty('--accent2', a2);
       document.documentElement.style.setProperty('--ring', `rgba(${hexToRgb(a1).join(',')}, .35)`);
