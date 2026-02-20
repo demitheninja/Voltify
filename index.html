@@ -219,11 +219,6 @@
       font-size: 15px;
     }
 
-    .searchRow input:focus{
-      border-color: color-mix(in oklab, var(--accent) 55%, rgba(255,255,255,.14));
-      box-shadow: 0 0 0 4px var(--ring);
-    }
-
     .go{
       padding: 12px 14px;
       border-radius: 14px;
@@ -255,9 +250,6 @@
       border-color: color-mix(in oklab, var(--accent) 40%, rgba(255,255,255,.12));
       box-shadow: 0 0 0 4px var(--ring);
     }
-
-    .tile b{display:block;font-size:16px}
-    .tile small{color:var(--muted)}
 
     .sideCard{
       padding:18px;
@@ -326,6 +318,9 @@
       justify-content:space-between;
       border-bottom:1px solid rgba(255,255,255,.10);
       background: rgba(0,0,0,.3);
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
     .modalHead b{
@@ -355,83 +350,139 @@
       padding:30px;
     }
 
-    /* PIN System Styles */
-    .pin-container {
-      background: rgba(0,0,0,.3);
-      border-radius: 24px;
-      padding: 30px;
-      border: 1px solid var(--secret);
-      box-shadow: 0 0 30px rgba(255,215,0,0.1);
+    /* Theme Section (Original) */
+    .setCard{
+      border:1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      background: rgba(255,255,255,.05);
+      padding:20px;
+      margin-bottom: 30px;
     }
 
-    .pin-header {
-      color: var(--secret);
-      font-size: 24px;
-      font-weight: 700;
+    .setCard h3{
+      margin:0 0 15px 0;
+      font-size:18px;
+      color: var(--text);
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
       margin-bottom: 20px;
+    }
+
+    .preset{
+      cursor:pointer;
+      padding:10px 16px;
+      border-radius: 30px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      font-weight:600;
+      font-size:14px;
+      transition:.15s;
+    }
+
+    .preset:hover{
+      box-shadow:0 0 0 4px var(--ring);
+      border-color: var(--accent);
+    }
+
+    .picker{
+      display:flex;
+      align-items:center;
+      gap:15px;
+      margin-top:10px;
+    }
+
+    .picker label{
+      color: var(--muted);
+      font-size:14px;
+    }
+
+    input[type="color"]{
+      width:50px;
+      height:40px;
+      border:1px solid rgba(255,255,255,.2);
+      border-radius:10px;
+      background:transparent;
+      padding:0;
+      cursor:pointer;
+    }
+
+    /* PIN System Section (New) */
+    .pin-section {
+      border: 2px solid var(--secret);
+      border-radius: 18px;
+      background: rgba(0,0,0,.3);
+      padding: 20px;
+      margin-top: 30px;
+    }
+
+    .pin-section h3 {
+      margin: 0 0 15px 0;
+      font-size: 18px;
+      color: var(--secret);
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .pin-display {
       background: rgba(0,0,0,.5);
       border: 2px solid var(--secret);
-      border-radius: 16px;
-      padding: 20px;
+      border-radius: 12px;
+      padding: 15px;
       text-align: center;
-      font-size: 42px;
+      font-size: 32px;
       font-weight: 700;
-      letter-spacing: 12px;
+      letter-spacing: 8px;
       color: var(--secret);
-      margin-bottom: 25px;
+      margin-bottom: 20px;
       font-family: monospace;
     }
 
     .pin-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-      margin-bottom: 25px;
+      gap: 12px;
+      margin-bottom: 20px;
     }
 
     .pin-btn {
       aspect-ratio: 1;
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,215,0,0.3);
-      border-radius: 20px;
+      border-radius: 16px;
       color: white;
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.15s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      transition: 0.15s;
     }
 
     .pin-btn:hover {
       background: rgba(255,215,0,0.2);
       border-color: var(--secret);
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(255,215,0,0.2);
     }
 
     .pin-actions {
       display: flex;
-      gap: 15px;
+      gap: 12px;
     }
 
     .pin-action-btn {
       flex: 1;
-      padding: 15px;
-      background: rgba(255,255,255,0.08);
+      padding: 12px;
       border: 1px solid rgba(255,215,0,0.3);
-      border-radius: 14px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.08);
       color: white;
       font-weight: 600;
       cursor: pointer;
-      transition: 0.15s;
     }
 
     .pin-action-btn.clear {
@@ -656,11 +707,6 @@
       transform: scale(1.02);
       box-shadow: 0 10px 20px rgba(124,58,237,0.3);
     }
-
-    .admin-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
   </style>
 </head>
 <body>
@@ -727,18 +773,39 @@
     </section>
   </div>
 
-  <!-- Settings Modal with PIN System -->
+  <!-- Settings Modal -->
   <div class="modalBack" id="modalBack">
     <div class="modal">
       <div class="modalHead">
-        <b>⚙️ Voltify Settings - PIN System</b>
+        <b>⚙️ Voltify Settings</b>
         <button class="close" id="closeSettings">Close</button>
       </div>
       <div class="modalBody">
-        <div class="pin-container">
-          <div class="pin-header">
-            <span>🔐 SECRET PIN ACCESS</span>
+        <!-- Theme Section (Original) -->
+        <div class="setCard">
+          <h3>Theme Presets</h3>
+          <div class="row">
+            <button class="preset" data-theme="neon">Neon</button>
+            <button class="preset" data-theme="ocean">Ocean</button>
+            <button class="preset" data-theme="ember">Ember</button>
+            <button class="preset" data-theme="mono">Mono</button>
           </div>
+
+          <div class="picker">
+            <label>Accent</label>
+            <input type="color" id="accentPicker" />
+            <label>Accent 2</label>
+            <input type="color" id="accent2Picker" />
+          </div>
+
+          <div class="smallNote" style="margin-top:15px; color:var(--muted);">
+            Presets change everything instantly. The color pickers let you fine-tune the 2 main colors.
+          </div>
+        </div>
+
+        <!-- PIN Section (New - Below Theme) -->
+        <div class="pin-section">
+          <h3>🔐 SECRET PIN ACCESS</h3>
           
           <div class="pin-display" id="pinDisplay">••••••</div>
           
@@ -762,13 +829,13 @@
             <button class="pin-action-btn" onclick="submitPin()">Enter</button>
           </div>
 
-          <div style="text-align: center; margin-top: 20px; color: var(--muted); font-size: 12px;" id="pinMessage"></div>
+          <div style="text-align: center; margin-top: 15px; color: var(--muted); font-size: 12px;" id="pinMessage"></div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Blooket Hacks UI (For Users when PIN correct) -->
+  <!-- Blooket Hacks UI (Users) -->
   <div class="blooket-ui" id="blooketUI">
     <div class="blooket-header">
       <h2>🎮 BLOOKET HACKS</h2>
@@ -799,7 +866,7 @@
     </div>
   </div>
 
-  <!-- Admin UI (For YOU when admin PIN entered) -->
+  <!-- Admin UI -->
   <div class="admin-ui" id="adminUI">
     <div class="admin-header">
       <h2>👑 ADMIN PANEL</h2>
@@ -837,18 +904,99 @@
   </div>
 
   <script>
+    // ========== ORIGINAL THEME CODE ==========
+    const themes = {
+      neon:  { accent:'#7C3AED', accent2:'#22C55E', bg0:'#070A12', bg1:'#0B1020' },
+      ocean: { accent:'#06B6D4', accent2:'#3B82F6', bg0:'#041018', bg1:'#061A2B' },
+      ember: { accent:'#F97316', accent2:'#EF4444', bg0:'#120707', bg1:'#1D0B0B' },
+      mono:  { accent:'#A3A3A3', accent2:'#E5E7EB', bg0:'#070707', bg1:'#111111' },
+    };
+
+    function applyTheme(t){
+      const r = document.documentElement;
+      r.style.setProperty('--accent', t.accent);
+      r.style.setProperty('--accent2', t.accent2);
+      r.style.setProperty('--bg0', t.bg0);
+      r.style.setProperty('--bg1', t.bg1);
+      r.style.setProperty('--ring', `rgba(${hexToRgb(t.accent).join(',')}, .35)`);
+    }
+
+    function hexToRgb(hex){
+      const h = hex.replace('#','').trim();
+      const full = h.length === 3 ? h.split('').map(c=>c+c).join('') : h;
+      const n = parseInt(full, 16);
+      return [(n>>16)&255, (n>>8)&255, n&255];
+    }
+
+    function saveThemeState(state){
+      localStorage.setItem('voltify_theme', JSON.stringify(state));
+    }
+    
+    function loadThemeState(){
+      try{
+        return JSON.parse(localStorage.getItem('voltify_theme') || 'null');
+      }catch{ return null; }
+    }
+
+    const saved = loadThemeState();
+    if (saved?.preset && themes[saved.preset]) {
+      applyTheme(themes[saved.preset]);
+      if (saved.customAccent) document.documentElement.style.setProperty('--accent', saved.customAccent);
+      if (saved.customAccent2) document.documentElement.style.setProperty('--accent2', saved.customAccent2);
+    } else {
+      applyTheme(themes.neon);
+    }
+
+    function currentVar(name){
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+    
+    const accentPicker = document.getElementById('accentPicker');
+    const accent2Picker = document.getElementById('accent2Picker');
+    accentPicker.value = rgbToHex(currentVar('--accent'));
+    accent2Picker.value = rgbToHex(currentVar('--accent2'));
+
+    function rgbToHex(v){
+      if (v.startsWith('#')) return v;
+      const m = v.match(/(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+      if (!m) return '#7C3AED';
+      const [r,g,b] = [Number(m[1]),Number(m[2]),Number(m[3])];
+      return '#' + [r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');
+    }
+
+    document.querySelectorAll('.preset').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const key = btn.dataset.theme;
+        applyTheme(themes[key]);
+        document.documentElement.style.setProperty('--ring', `rgba(${hexToRgb(themes[key].accent).join(',')}, .35)`);
+        accentPicker.value = themes[key].accent;
+        accent2Picker.value = themes[key].accent2;
+        saveThemeState({ preset:key, customAccent:themes[key].accent, customAccent2:themes[key].accent2 });
+      });
+    });
+
+    function applyCustomColors(){
+      const a1 = accentPicker.value;
+      const a2 = accent2Picker.value;
+      document.documentElement.style.setProperty('--accent', a1);
+      document.documentElement.style.setProperty('--accent2', a2);
+      document.documentElement.style.setProperty('--ring', `rgba(${hexToRgb(a1).join(',')}, .35)`);
+      const last = loadThemeState() || { preset:'custom' };
+      saveThemeState({ ...last, preset:last.preset || 'custom', customAccent:a1, customAccent2:a2 });
+    }
+    accentPicker.addEventListener('input', applyCustomColors);
+    accent2Picker.addEventListener('input', applyCustomColors);
+
     // ========== PIN SYSTEM ==========
     let currentPin = '';
     let pinDisabled = false;
     let pinUses = 0;
     const ADMIN_PIN = '091202';
     
-    // Load pinUses from localStorage
     if (localStorage.getItem('pinUses')) {
       pinUses = parseInt(localStorage.getItem('pinUses'));
     }
 
-    // Generate bi-weekly PIN
     function generateBiWeeklyPin() {
       const now = new Date();
       const twoWeekPeriod = Math.floor(now.getTime() / (14 * 24 * 60 * 60 * 1000));
@@ -856,7 +1004,6 @@
       return pinSeed.slice(-6).padStart(6, '0');
     }
 
-    // Get days until PIN expires
     function getDaysUntilExpiry() {
       const now = new Date();
       const startOfPeriod = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (now.getDay() % 14));
@@ -869,18 +1016,14 @@
     function addPinDigit(digit) {
       if (currentPin.length < 6) {
         currentPin += digit;
-        updatePinDisplay();
+        document.getElementById('pinDisplay').textContent = currentPin.padEnd(6, '•');
       }
     }
 
     function clearPin() {
       currentPin = '';
-      updatePinDisplay();
+      document.getElementById('pinDisplay').textContent = '••••••';
       document.getElementById('pinMessage').textContent = '';
-    }
-
-    function updatePinDisplay() {
-      document.getElementById('pinDisplay').textContent = currentPin.padEnd(6, '•');
     }
 
     function submitPin() {
@@ -891,33 +1034,30 @@
         messageEl.style.color = '#FF6B6B';
         messageEl.textContent = '❌ PIN system is currently disabled by admin';
         currentPin = '';
-        updatePinDisplay();
+        document.getElementById('pinDisplay').textContent = '••••••';
         return;
       }
       
       if (currentPin === ADMIN_PIN) {
-        // Admin PIN - opens Admin UI
         document.getElementById('adminUI').style.display = 'block';
         updateAdminDisplay();
         messageEl.textContent = '';
         currentPin = '';
-        updatePinDisplay();
+        document.getElementById('pinDisplay').textContent = '••••••';
         document.getElementById('modalBack').style.display = 'none';
       } else if (currentPin === biWeeklyPin) {
-        // User PIN - opens Blooket Hacks
         document.getElementById('blooketUI').style.display = 'block';
         pinUses++;
         localStorage.setItem('pinUses', pinUses);
         messageEl.textContent = '';
         currentPin = '';
-        updatePinDisplay();
+        document.getElementById('pinDisplay').textContent = '••••••';
         document.getElementById('modalBack').style.display = 'none';
       } else {
-        // Wrong PIN
         messageEl.style.color = '#FF6B6B';
         messageEl.textContent = '❌ Invalid PIN';
         currentPin = '';
-        updatePinDisplay();
+        document.getElementById('pinDisplay').textContent = '••••••';
         setTimeout(() => {
           messageEl.textContent = '';
         }, 2000);
@@ -1068,10 +1208,14 @@
     
     document.getElementById('closeSettings').addEventListener('click', () => {
       modalBack.style.display = 'none';
+      clearPin();
     });
     
     modalBack.addEventListener('click', (e) => {
-      if (e.target === modalBack) modalBack.style.display = 'none';
+      if (e.target === modalBack) {
+        modalBack.style.display = 'none';
+        clearPin();
+      }
     });
   </script>
 </body>
