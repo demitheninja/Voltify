@@ -1,833 +1,169 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Voltify</title>
-  <link rel="icon" type="image/png" href="logo.png" />
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
-
-  <!-- Ultraviolet Proxy Dependencies -->
-  <script src="https://cdn.jsdelivr.net/npm/@tomphttp/bare-client@2.0.1/dist/index.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/ultraviolet@1.0.2/dist/ultraviolet.min.js"></script>
-
-  <style>
-    :root{
-      --bg0:#070A12;
-      --bg1:#0B1020;
-      --panel: rgba(255,255,255,.06);
-      --panel2: rgba(255,255,255,.10);
-      --text:#EAF0FF;
-      --muted: rgba(234,240,255,.62);
-      --accent:#7C3AED;
-      --accent2:#22C55E;
-      --ring: rgba(124,58,237,.35);
-      --shadow: 0 18px 60px rgba(0,0,0,.55);
-      --radius: 18px;
-    }
-
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family:"Space Grotesk", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(1200px 600px at 20% 10%, color-mix(in oklab, var(--accent) 18%, transparent), transparent 60%),
-        radial-gradient(900px 500px at 85% 20%, color-mix(in oklab, var(--accent2) 14%, transparent), transparent 55%),
-        radial-gradient(900px 700px at 50% 80%, rgba(255,255,255,.06), transparent 60%),
-        linear-gradient(180deg, var(--bg0) 0%, var(--bg1) 100%);
-      overflow-x:hidden;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    @keyframes bounce {
-      0%, 80%, 100% { transform: scale(0); }
-      40% { transform: scale(1); }
-    }
-    @keyframes pulse {
-      0% { opacity: 0.6; }
-      50% { opacity: 1; }
-      100% { opacity: 0.6; }
-    }
-
-    .energy{
-      position:fixed;
-      inset:-2px;
-      pointer-events:none;
-      opacity:.55;
-      background:
-        repeating-linear-gradient(90deg, rgba(255,255,255,.04) 0 1px, transparent 1px 60px),
-        repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 1px, transparent 1px 60px);
-      mask-image: radial-gradient(circle at 50% 35%, black 0%, transparent 68%);
-      animation: drift 10s linear infinite;
-    }
-    @keyframes drift{
-      from{transform:translate3d(0,0,0)}
-      to{transform:translate3d(-60px, -60px, 0)}
-    }
-
-    header{
-      position:sticky;
-      top:0;
-      z-index:50;
-      backdrop-filter: blur(12px);
-      background: linear-gradient(180deg, rgba(10,12,20,.82), rgba(10,12,20,.45));
-      border-bottom:1px solid rgba(255,255,255,.10);
-    }
-    .topbar{
-      max-width:1100px;
-      margin:0 auto;
-      padding:12px 16px;
-      display:flex;
-      align-items:center;
-      gap:12px;
-    }
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      font-weight:700;
-      letter-spacing:.4px;
-    }
-    .bolt{
-      width:34px;height:34px;border-radius:12px;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.35), transparent 55%),
-                  linear-gradient(135deg, var(--accent), var(--accent2));
-      box-shadow: 0 0 0 1px rgba(255,255,255,.18), 0 18px 50px rgba(0,0,0,.45);
-      display:grid;
-      place-items:center;
-      font-size:18px;
-    }
-    nav{
-      margin-left:auto;
-      display:flex;
-      gap:8px;
-      align-items:center;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-    .navbtn{
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      color:var(--text);
-      padding:9px 12px;
-      border-radius:14px;
-      text-decoration:none;
-      font-weight:600;
-      font-size:14px;
-      transition:.15s ease;
-    }
-    .navbtn:hover{
-      transform: translateY(-1px);
-      border-color: color-mix(in oklab, var(--accent) 40%, rgba(255,255,255,.12));
-      box-shadow: 0 0 0 3px var(--ring);
-    }
-
-    .wrap{
-      max-width:1100px;
-      margin:0 auto;
-      padding:28px 16px 40px;
-    }
-
-    .hero{
-      display:grid;
-      grid-template-columns: 1.25fr .75fr;
-      gap:16px;
-      align-items:stretch;
-      margin-top:16px;
-    }
-    @media (max-width: 900px){
-      .hero{grid-template-columns:1fr}
-    }
-
-    .card{
-      border-radius: var(--radius);
-      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
-      border: 1px solid rgba(255,255,255,.12);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      position:relative;
-    }
-    .card::before{
-      content:"";
-      position:absolute;
-      inset:-2px;
-      background: radial-gradient(800px 240px at 20% 0%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 60%),
-                  radial-gradient(800px 240px at 80% 0%, color-mix(in oklab, var(--accent2) 18%, transparent), transparent 60%);
-      opacity:.7;
-      pointer-events:none;
-    }
-    .card > *{position:relative; z-index:1}
-
-    .mainCard{
-      padding:22px;
-      min-height: 320px;
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-    }
-    .title{
-      margin:0;
-      font-size: clamp(34px, 4vw, 56px);
-      line-height:1.05;
-      letter-spacing:-.5px;
-    }
-    .subtitle{
-      margin:0;
-      color:var(--muted);
-      font-size: 16px;
-    }
-
-    .searchMode {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
-      background: rgba(0,0,0,.25);
-      padding: 6px;
-      border-radius: 40px;
-      width: fit-content;
-      border: 1px solid rgba(255,255,255,.1);
-    }
-    .modeBtn {
-      padding: 8px 16px;
-      border-radius: 30px;
-      border: none;
-      background: transparent;
-      color: var(--muted);
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      transition: all .15s ease;
-    }
-    .modeBtn.active {
-      background: var(--accent);
-      color: white;
-      box-shadow: 0 4px 12px rgba(124,58,237,.3);
-    }
-    .modeBtn.proxyMode.active {
-      background: var(--accent2);
-    }
-
-    .searchRow{
-      margin-top:8px;
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-    .searchRow input{
-      flex:1;
-      padding: 14px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.14);
-      outline:none;
-      background: rgba(0,0,0,.18);
-      color: var(--text);
-      font-size: 15px;
-    }
-    .searchRow input:focus{
-      border-color: color-mix(in oklab, var(--accent) 55%, rgba(255,255,255,.14));
-      box-shadow: 0 0 0 4px var(--ring);
-    }
-    .go{
-      padding: 12px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: linear-gradient(135deg, color-mix(in oklab, var(--accent) 80%, #000), color-mix(in oklab, var(--accent2) 70%, #000));
-      color: white;
-      font-weight:700;
-      cursor:pointer;
-    }
-
-    .quickGrid{
-      margin-top:auto;
-      display:grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap:10px;
-    }
-    .tile{
-      padding:14px;
-      border-radius: 16px;
-      background: rgba(0,0,0,.18);
-      border:1px solid rgba(255,255,255,.12);
-      text-decoration:none;
-      color:var(--text);
-      transition:.15s ease;
-    }
-    .tile:hover{
-      transform: translateY(-2px);
-      border-color: color-mix(in oklab, var(--accent) 40%, rgba(255,255,255,.12));
-      box-shadow: 0 0 0 4px var(--ring);
-    }
-    .tile b{display:block;font-size:16px}
-    .tile small{color:var(--muted)}
-
-    .sideCard{
-      padding:18px;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-    .badgeRow{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    .badge{
-      padding:10px 12px;
-      border-radius: 999px;
-      background: rgba(0,0,0,.22);
-      border:1px solid rgba(255,255,255,.12);
-      color: var(--muted);
-      font-size: 13px;
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-    .dot{
-      width:8px;height:8px;border-radius:50%;
-      background: var(--accent2);
-      box-shadow: 0 0 18px color-mix(in oklab, var(--accent2) 50%, transparent);
-    }
-
-    .bigNum{
-      font-size: 34px;
-      font-weight:800;
-      letter-spacing:-.5px;
-      color: var(--text);
-      margin-top:2px;
-    }
-
-    .modalBack{
-      position:fixed; inset:0;
-      background: rgba(0,0,0,.55);
-      display:none;
-      place-items:center;
-      padding:16px;
-      z-index:99;
-    }
-    .modal{
-      width: min(720px, 96vw);
-      border-radius: 20px;
-      background: rgba(10,12,20,.90);
-      border:1px solid rgba(255,255,255,.14);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-    .modalHead{
-      padding:14px 16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      border-bottom:1px solid rgba(255,255,255,.10);
-    }
-    .modalHead b{font-size:16px}
-    .close{
-      cursor:pointer;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      padding: 8px 10px;
-      border-radius: 12px;
-      font-weight:700;
-    }
-    .modalBody{
-      padding:16px;
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:14px;
-    }
-    @media (max-width: 760px){ .modalBody{grid-template-columns:1fr} }
-
-    .setCard{
-      border:1px solid rgba(255,255,255,.12);
-      border-radius: 18px;
-      background: rgba(255,255,255,.05);
-      padding:14px;
-    }
-    .setCard h3{margin:0 0 8px; font-size:14px}
-    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
-    .preset{
-      cursor:pointer;
-      padding:10px 12px;
-      border-radius: 14px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18);
-      color: var(--text);
-      font-weight:700;
-      font-size: 13px;
-    }
-    .preset:hover{box-shadow:0 0 0 4px var(--ring)}
-    .picker{
-      display:flex; align-items:center; gap:10px;
-      margin-top:10px;
-    }
-    .picker label{color: var(--muted); font-size:13px}
-    input[type="color"]{
-      width:46px;height:34px;border:0;background:transparent; padding:0;
-    }
-    .smallNote{color: var(--muted); font-size:12px; margin-top:10px; line-height:1.4}
-
-    /* Ultraviolet Proxy Styles */
-    .uv-proxy-frame {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-      z-index: 9999;
-      background: white;
-      display: none;
-    }
-    .uv-close {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 10000;
-      background: #7C3AED;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 30px;
-      cursor: pointer;
-      display: none;
-      font-weight: bold;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.2);
-    }
-    .uv-close:hover {
-      background: #6D28D9;
-    }
-  </style>
-</head>
-
-<body>
-  <!-- Loading Screen -->
-  <div id="loadingScreen" style="
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #070A12;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    transition: opacity 0.5s ease;
-  ">
-    <div style="
-      width: 80px;
-      height: 80px;
-      border: 4px solid rgba(124, 58, 237, 0.2);
-      border-top: 4px solid #7C3AED;
-      border-right: 4px solid #22C55E;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 30px;
-    "></div>
-    
-    <div style="
-      font-size: 32px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #7C3AED, #22C55E);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 15px;
-      letter-spacing: 2px;
-    ">⚡ VOLTIFY</div>
-    
-    <div style="
-      color: rgba(234, 240, 255, 0.8);
-      font-size: 16px;
-      letter-spacing: 3px;
-      margin-bottom: 25px;
-      animation: pulse 2s infinite;
-    " id="loadingText">LOADING</div>
-    
-    <div style="
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
-    ">
-      <span style="
-        width: 10px;
-        height: 10px;
-        background: #7C3AED;
-        border-radius: 50%;
-        animation: bounce 1.4s infinite ease-in-out both;
-        animation-delay: -0.32s;
-      "></span>
-      <span style="
-        width: 10px;
-        height: 10px;
-        background: #22C55E;
-        border-radius: 50%;
-        animation: bounce 1.4s infinite ease-in-out both;
-        animation-delay: -0.16s;
-      "></span>
-      <span style="
-        width: 10px;
-        height: 10px;
-        background: #7C3AED;
-        border-radius: 50%;
-        animation: bounce 1.4s infinite ease-in-out both;
-      "></span>
-    </div>
-  </div>
-
-  <div class="energy"></div>
-
-  <header>
-    <div class="topbar">
-      <div class="brand">
-        <img src="logo.png" alt="Voltify Logo" style="width:34px;height:34px;border-radius:12px;">
-        <div>Voltify</div>
-      </div>
-
-      <nav>
-        <a class="navbtn" href="index.html">Home</a>
-        <a class="navbtn" href="games.html">Games</a>
-        <a class="navbtn" href="movies.html">Movies</a>
-        <a class="navbtn" href="#" id="openSettings">Settings</a>
-      </nav>
-    </div>
-  </header>
-
-  <div class="wrap">
-    <section class="hero">
-      <div class="card">
-        <div class="mainCard">
-          <h1 class="title">Voltify⚡</h1>
-          <p class="subtitle">Games, Movies, And Proxies Made For You.</p>
-
-          <div class="searchMode">
-            <button class="modeBtn active" id="normalMode">🔍 Normal Search</button>
-            <button class="modeBtn" id="proxyMode">🛡️ Proxy Mode</button>
-          </div>
-
-          <div class="searchRow">
-            <input id="searchInput" placeholder="Search Google or type a URL..." autocomplete="off" />
-            <button class="go" id="goBtn">Go</button>
-          </div>
-
-          <div class="quickGrid">
-            <a class="tile" href="games.html">
-              <b>🎮 Games</b>
-              <small>Play your stuff</small>
-            </a>
-            <a class="tile" href="movies.html">
-              <b>🎬 Movies</b>
-              <small>Watch your films</small>
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="sideCard">
-          <div class="badgeRow">
-            <div class="badge"><span class="dot"></span><span id="timeText">--:--</span></div>
-            <div class="badge">Visitors: <b id="visitorCount">--</b></div>
-          </div>
-
-          <div style="margin-top:6px;color:var(--muted);font-weight:600;">Status</div>
-          <div class="bigNum" id="statusText">Active!</div>
-
-          <div class="smallNote">
-            Tip: Don't Introduce The Site By Saying "Check Out (My Name)'s Site! Please say Voltify
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <!-- Settings Modal -->
-  <div class="modalBack" id="modalBack" role="dialog" aria-modal="true" aria-label="Settings">
-    <div class="modal">
-      <div class="modalHead">
-        <b>⚙️ Voltify Settings</b>
-        <button class="close" id="closeSettings">Close</button>
-      </div>
-
-      <div class="modalBody">
-        <div class="setCard">
-          <h3>Theme Presets</h3>
-          <div class="row">
-            <button class="preset" data-theme="neon">Neon</button>
-            <button class="preset" data-theme="ocean">Ocean</button>
-            <button class="preset" data-theme="ember">Ember</button>
-            <button class="preset" data-theme="mono">Mono</button>
-          </div>
-
-          <div class="picker">
-            <label>Accent</label>
-            <input type="color" id="accentPicker" />
-            <label>Accent 2</label>
-            <input type="color" id="accent2Picker" />
-          </div>
-
-          <div class="smallNote">
-            Presets change everything instantly. The color pickers let you fine-tune the 2 main colors.
-          </div>
-        </div>
-        <div class="setCard">
-          <h3>Site Analytics</h3>
-          <div class="smallNote">
-            Live visitor tracking enabled.
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // ========== LOADING SCREEN ==========
-    const loadingMessages = [
-      "CHARGING UP...", "SPARKING CONNECTION...", "VOLTIFYING...",
-      "GATHERING ELECTRONS...", "POWERING PROXY...", "ZAPPING CONTENT...",
-      "ENERGIZING...", "CONNECTING TO THE GRID...", "⚡⚡⚡",
-      "WAKING THE BOLT...", "HARNESSING LIGHTNING...", "ACTIVATING SHIELD...",
-      "BOOSTING SIGNAL...", "MAXIMUM OVERDRIVE..."
-    ];
-    
-    document.getElementById('loadingText').textContent = 
-      loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
-    
-    window.addEventListener('load', function() {
-      setTimeout(function() {
-        document.getElementById('loadingScreen').style.opacity = '0';
-        setTimeout(function() {
-          document.getElementById('loadingScreen').style.display = 'none';
-        }, 500);
-      }, 1000);
-    });
-
-    // ========== ULTRAVIOLET PROXY ==========
-    const uv = new Ultraviolet();
-    let uvFrame = null;
-    let uvCloseBtn = null;
-
-    function createUVFrame() {
-      uvFrame = document.createElement('iframe');
-      uvFrame.className = 'uv-proxy-frame';
-      document.body.appendChild(uvFrame);
-      
-      uvCloseBtn = document.createElement('button');
-      uvCloseBtn.className = 'uv-close';
-      uvCloseBtn.textContent = '✕ Close Proxy';
-      uvCloseBtn.onclick = closeUVFrame;
-      document.body.appendChild(uvCloseBtn);
-    }
-
-    function closeUVFrame() {
-      if (uvFrame) {
-        uvFrame.style.display = 'none';
-        uvFrame.src = 'about:blank';
-      }
-      if (uvCloseBtn) uvCloseBtn.style.display = 'none';
-    }
-
-    function openUVProxy(url) {
-      if (!uvFrame) createUVFrame();
-      
-      try {
-        const encodedUrl = uv.encode(url);
-        uvFrame.src = encodedUrl;
-        uvFrame.style.display = 'block';
-        uvCloseBtn.style.display = 'block';
-      } catch (error) {
-        alert('Error opening proxy: ' + error.message);
-      }
-    }
-
-    // ========== SEARCH/PROXY MODE ==========
-    let searchMode = 'normal';
-    
-    const normalBtn = document.getElementById('normalMode');
-    const proxyBtn = document.getElementById('proxyMode');
-    const searchInput = document.getElementById('searchInput');
-    const goBtn = document.getElementById('goBtn');
-    
-    normalBtn.addEventListener('click', () => {
-      searchMode = 'normal';
-      normalBtn.classList.add('active');
-      proxyBtn.classList.remove('active');
-      searchInput.placeholder = 'Search Google or type a URL...';
-    });
-    
-    proxyBtn.addEventListener('click', () => {
-      searchMode = 'proxy';
-      proxyBtn.classList.add('active');
-      normalBtn.classList.remove('active');
-      searchInput.placeholder = 'Enter site to visit (e.g., google.com)';
-    });
-    
-    function runSearch() {
-      const q = searchInput.value.trim();
-      if (!q) return;
-      
-      if (searchMode === 'normal') {
-        const looksLikeUrl = q.includes('.') && !q.includes(' ') && !q.startsWith('?');
-        const url = looksLikeUrl
-          ? (q.startsWith('http') ? q : 'https://' + q)
-          : 'https://www.google.com/search?q=' + encodeURIComponent(q);
-        window.open(url, '_blank', 'noopener');
-      } else {
-        let proxyUrl = q;
-        if (!proxyUrl.startsWith('http://') && !proxyUrl.startsWith('https://')) {
-          proxyUrl = 'https://' + proxyUrl;
+    <title>Homework Helper</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { 
+            font-family: Arial; 
+            padding: 30px; 
+            max-width: 800px; 
+            margin: 0 auto;
+            background: #f5f7fa;
         }
-        openUVProxy(proxyUrl);
-      }
-    }
+        h1 { color: #2c3e50; }
+        .box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        input { 
+            padding: 12px; 
+            width: 70%; 
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+        button { 
+            padding: 12px 25px; 
+            background: #3498db; 
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .mode-btn {
+            padding: 10px 20px;
+            border: 2px solid #3498db;
+            background: transparent;
+            color: #3498db;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .mode-btn.active {
+            background: #3498db;
+            color: white;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+            background: white;
+        }
+        .note {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>📚 Homework Helper</h1>
     
-    goBtn.addEventListener('click', runSearch);
-    searchInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') runSearch();
-    });
-
-    // ========== TIME ==========
-    function updateTime(){
-      const d = new Date();
-      let h = d.getHours();
-      const m = String(d.getMinutes()).padStart(2,'0');
-      const ampm = h >= 12 ? 'PM' : 'AM';
-      h = h % 12; if (h === 0) h = 12;
-      document.getElementById('timeText').textContent = `${h}:${m} ${ampm}`;
-    }
-    updateTime();
-    setInterval(updateTime, 1000);
-
-    // ========== THEMES ==========
-    const themes = {
-      neon:  { accent:'#7C3AED', accent2:'#22C55E', bg0:'#070A12', bg1:'#0B1020' },
-      ocean: { accent:'#06B6D4', accent2:'#3B82F6', bg0:'#041018', bg1:'#061A2B' },
-      ember: { accent:'#F97316', accent2:'#EF4444', bg0:'#120707', bg1:'#1D0B0B' },
-      mono:  { accent:'#A3A3A3', accent2:'#E5E7EB', bg0:'#070707', bg1:'#111111' },
-    };
-
-    function applyTheme(t){
-      const r = document.documentElement;
-      r.style.setProperty('--accent', t.accent);
-      r.style.setProperty('--accent2', t.accent2);
-      r.style.setProperty('--bg0', t.bg0);
-      r.style.setProperty('--bg1', t.bg1);
-      r.style.setProperty('--ring', `rgba(${hexToRgb(t.accent).join(',')}, .35)`);
-    }
-
-    function hexToRgb(hex){
-      const h = hex.replace('#','').trim();
-      const full = h.length === 3 ? h.split('').map(c=>c+c).join('') : h;
-      const n = parseInt(full, 16);
-      return [(n>>16)&255, (n>>8)&255, n&255];
-    }
-
-    function saveThemeState(state){
-      localStorage.setItem('voltify_theme', JSON.stringify(state));
-    }
+    <div class="mode-selector">
+        <button class="mode-btn active" id="normalMode">🔍 Normal</button>
+        <button class="mode-btn" id="proxyMode">🛡️ Proxy</button>
+    </div>
     
-    function loadThemeState(){
-      try{
-        return JSON.parse(localStorage.getItem('voltify_theme') || 'null');
-      }catch{ return null; }
-    }
-
-    const saved = loadThemeState();
-    if (saved?.preset && themes[saved.preset]) {
-      applyTheme(themes[saved.preset]);
-      if (saved.customAccent) document.documentElement.style.setProperty('--accent', saved.customAccent);
-      if (saved.customAccent2) document.documentElement.style.setProperty('--accent2', saved.customAccent2);
-    } else {
-      applyTheme(themes.neon);
-    }
-
-    function currentVar(name){
-      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-    }
+    <div class="box">
+        <input id="url" placeholder="Enter website (e.g., google.com)">
+        <button onclick="go()">Go</button>
+    </div>
     
-    const accentPicker = document.getElementById('accentPicker');
-    const accent2Picker = document.getElementById('accent2Picker');
-    accentPicker.value = rgbToHex(currentVar('--accent'));
-    accent2Picker.value = rgbToHex(currentVar('--accent2'));
+    <iframe id="frame"></iframe>
+    
+    <div class="note" id="status">Ready</div>
 
-    function rgbToHex(v){
-      if (v.startsWith('#')) return v;
-      const m = v.match(/(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
-      if (!m) return '#7C3AED';
-      const [r,g,b] = [Number(m[1]),Number(m[2]),Number(m[3])];
-      return '#' + [r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');
-    }
-
-    document.querySelectorAll('.preset').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const key = btn.dataset.theme;
-        applyTheme(themes[key]);
-        document.documentElement.style.setProperty('--ring', `rgba(${hexToRgb(themes[key].accent).join(',')}, .35)`);
-        accentPicker.value = themes[key].accent;
-        accent2Picker.value = themes[key].accent2;
-        saveThemeState({ preset:key, customAccent:themes[key].accent, customAccent2:themes[key].accent2 });
-      });
-    });
-
-    function applyCustomColors(){
-      const a1 = accentPicker.value;
-      const a2 = accent2Picker.value;
-      document.documentElement.style.setProperty('--accent', a1);
-      document.documentElement.style.setProperty('--accent2', a2);
-      document.documentElement.style.setProperty('--ring', `rgba(${hexToRgb(a1).join(',')}, .35)`);
-      const last = loadThemeState() || { preset:'custom' };
-      saveThemeState({ ...last, preset:last.preset || 'custom', customAccent:a1, customAccent2:a2 });
-    }
-    accentPicker.addEventListener('input', applyCustomColors);
-    accent2Picker.addEventListener('input', applyCustomColors);
-
-    // ========== SETTINGS MODAL ==========
-    const modalBack = document.getElementById('modalBack');
-    document.getElementById('openSettings').addEventListener('click', (e)=>{
-      e.preventDefault();
-      modalBack.style.display = 'grid';
-    });
-    document.getElementById('closeSettings').addEventListener('click', ()=>{
-      modalBack.style.display = 'none';
-    });
-    modalBack.addEventListener('click', (e)=>{
-      if (e.target === modalBack) modalBack.style.display = 'none';
-    });
-
-    // ========== VISITOR COUNTER ==========
-    const COUNT_NAMESPACE = 'voltify-' + Math.random().toString(36).substring(7);
-    const COUNT_KEY = 'home';
-
-    function localCount(){
-      const k = 'voltify_local_visits';
-      const v = Number(localStorage.getItem(k) || '0') + 1;
-      localStorage.setItem(k, String(v));
-      return v;
-    }
-
-    async function updateVisitorCount(){
-      const el = document.getElementById('visitorCount');
-      try{
-        const url = `https://api.countapi.xyz/hit/${encodeURIComponent(COUNT_NAMESPACE)}/${encodeURIComponent(COUNT_KEY)}`;
-        const r = await fetch(url, { cache:'no-store' });
-        if (!r.ok) throw new Error('bad response');
-        const data = await r.json();
-        el.textContent = data.value.toLocaleString();
-      } catch (err){
-        el.textContent = localCount().toLocaleString();
-      }
-    }
-    updateVisitorCount();
-  </script>
+    <script>
+        let mode = 'normal';
+        
+        // Mode buttons
+        document.getElementById('normalMode').addEventListener('click', () => {
+            mode = 'normal';
+            document.getElementById('normalMode').classList.add('active');
+            document.getElementById('proxyMode').classList.remove('active');
+            document.getElementById('status').textContent = 'Normal mode - opens in new tab';
+        });
+        
+        document.getElementById('proxyMode').addEventListener('click', () => {
+            mode = 'proxy';
+            document.getElementById('proxyMode').classList.add('active');
+            document.getElementById('normalMode').classList.remove('active');
+            document.getElementById('status').textContent = 'Proxy mode - loads in iframe';
+        });
+        
+        // Main function
+        async function go() {
+            let input = document.getElementById('url').value;
+            if (!input) return;
+            
+            // Format URL
+            if (!input.startsWith('http')) {
+                input = 'https://' + input;
+            }
+            
+            if (mode === 'normal') {
+                // Normal mode - open in new tab
+                window.open(input, '_blank');
+            } else {
+                // Proxy mode - load through our proxy
+                let frame = document.getElementById('frame');
+                frame.style.display = 'block';
+                document.getElementById('status').textContent = 'Loading...';
+                
+                try {
+                    // Use a CORS proxy to fetch the site
+                    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(input);
+                    
+                    // Alternative proxies (if one fails)
+                    const proxies = [
+                        'https://api.allorigins.win/raw?url=',
+                        'https://corsproxy.io/?',
+                        'https://thingproxy.freeboard.io/fetch/'
+                    ];
+                    
+                    // Try each proxy until one works
+                    for (let p of proxies) {
+                        try {
+                            let response = await fetch(p + encodeURIComponent(input));
+                            if (response.ok) {
+                                let html = await response.text();
+                                frame.srcdoc = html;
+                                document.getElementById('status').textContent = 'Loaded via proxy';
+                                return;
+                            }
+                        } catch (e) {
+                            console.log('Proxy failed:', p);
+                        }
+                    }
+                    
+                    // If all proxies fail, show error
+                    frame.srcdoc = '<html><body style="padding:20px">Error: Could not load site. Try another URL.</body></html>';
+                    document.getElementById('status').textContent = 'Failed to load';
+                    
+                } catch (error) {
+                    frame.srcdoc = '<html><body style="padding:20px">Error: ' + error.message + '</body></html>';
+                    document.getElementById('status').textContent = 'Error';
+                }
+            }
+        }
+        
+        // Enter key
+        document.getElementById('url').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') go();
+        });
+    </script>
 </body>
 </html>
