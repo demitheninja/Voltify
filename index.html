@@ -636,17 +636,8 @@
         
         window.open(url, '_blank', 'noopener');
       } else {
-        // PROXY MODE - use our Vercel proxy
-        let proxyUrl = q;
-        
-        // Add https:// if missing
-        if (!proxyUrl.startsWith('http://') && !proxyUrl.startsWith('https://')) {
-          proxyUrl = 'https://' + proxyUrl;
-        }
-        
-        // Open through our proxy
-        window.open('/api/proxy?url=' + encodeURIComponent(proxyUrl), '_blank', 'noopener');
-      }
+    // PROXY MODE - Netlify Function
+window.open('/.netlify/functions/proxy?url=' + encodeURIComponent(proxyUrl), '_blank', 'noopener');          }
     }
     
     // Event listeners
