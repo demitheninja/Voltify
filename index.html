@@ -1,169 +1,977 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-    <title>Homework Helper</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        body { 
-            font-family: Arial; 
-            padding: 30px; 
-            max-width: 800px; 
-            margin: 0 auto;
-            background: #f5f7fa;
-        }
-        h1 { color: #2c3e50; }
-        .box {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        input { 
-            padding: 12px; 
-            width: 70%; 
-            font-size: 16px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-        }
-        button { 
-            padding: 12px 25px; 
-            background: #3498db; 
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .mode-selector {
-            display: flex;
-            gap: 10px;
-            margin: 20px 0;
-        }
-        .mode-btn {
-            padding: 10px 20px;
-            border: 2px solid #3498db;
-            background: transparent;
-            color: #3498db;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .mode-btn.active {
-            background: #3498db;
-            color: white;
-        }
-        iframe {
-            width: 100%;
-            height: 600px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            margin-top: 20px;
-            display: none;
-            background: white;
-        }
-        .note {
-            color: #7f8c8d;
-            font-size: 14px;
-            margin-top: 20px;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Voltify</title>
+  <link rel="icon" type="image/png" href="logo.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg0:#070A12;
+      --bg1:#0B1020;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.10);
+      --text:#EAF0FF;
+      --muted: rgba(234,240,255,.62);
+      --accent:#7C3AED;
+      --accent2:#22C55E;
+      --secret:#FFD700;
+      --ring: rgba(124,58,237,.35);
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
+      --radius: 18px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%; margin:0;}
+    body{
+      font-family:"Space Grotesk", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% 10%, color-mix(in oklab, var(--accent) 18%, transparent), transparent 60%),
+        radial-gradient(900px 500px at 85% 20%, color-mix(in oklab, var(--accent2) 14%, transparent), transparent 55%),
+        radial-gradient(900px 700px at 50% 80%, rgba(255,255,255,.06), transparent 60%),
+        linear-gradient(180deg, var(--bg0) 0%, var(--bg1) 100%);
+      overflow-x:hidden;
+    }
+
+    /* Main layout - SPLIT SCREEN */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* LEFT SIDE - Main Voltify Content */
+    .main-content {
+      flex: 1;
+      padding: 20px;
+    }
+
+    /* RIGHT SIDE - Secret PIN Pad */
+    .secret-sidebar {
+      width: 320px;
+      background: rgba(10, 15, 25, 0.85);
+      backdrop-filter: blur(12px);
+      border-left: 2px solid rgba(255, 215, 0, 0.3);
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+      position: relative;
+      overflow-y: auto;
+    }
+
+    .secret-sidebar::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--secret), transparent);
+    }
+
+    .pin-header {
+      color: var(--secret);
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    }
+
+    .pin-display {
+      width: 100%;
+      background: rgba(0,0,0,0.5);
+      border: 2px solid var(--secret);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 8px;
+      color: var(--secret);
+      margin-bottom: 20px;
+      font-family: monospace;
+    }
+
+    .pin-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    .pin-btn {
+      aspect-ratio: 1;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: 16px;
+      color: white;
+      font-size: 24px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pin-btn:hover {
+      background: rgba(255, 215, 0, 0.2);
+      border-color: var(--secret);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
+    }
+
+    .pin-btn:active {
+      transform: translateY(0);
+    }
+
+    .pin-actions {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .pin-action-btn {
+      flex: 1;
+      padding: 12px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: 12px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .pin-action-btn:hover {
+      background: rgba(255, 215, 0, 0.15);
+      border-color: var(--secret);
+    }
+
+    .pin-action-btn.clear {
+      background: rgba(255, 99, 99, 0.15);
+      border-color: rgba(255, 99, 99, 0.3);
+    }
+
+    .pin-action-btn.clear:hover {
+      background: rgba(255, 99, 99, 0.25);
+    }
+
+    /* Blooket Hacks UI - Hidden by Default */
+    .blooket-ui {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 900px;
+      background: rgba(10, 15, 30, 0.95);
+      backdrop-filter: blur(20px);
+      border: 3px solid var(--accent2);
+      border-radius: 30px;
+      padding: 30px;
+      z-index: 10000;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+      animation: glitchIn 0.3s ease;
+    }
+
+    @keyframes glitchIn {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+      100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    .blooket-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      border-bottom: 2px solid var(--accent2);
+      padding-bottom: 15px;
+    }
+
+    .blooket-header h2 {
+      margin: 0;
+      color: var(--accent2);
+      font-size: 28px;
+      text-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+    }
+
+    .close-blooket {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: white;
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-blooket:hover {
+      background: rgba(255,99,99,0.3);
+    }
+
+    /* Admin PIN Display in Blooket UI */
+    .admin-pin-panel {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(34, 197, 94, 0.2));
+      border: 2px solid var(--accent);
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 30px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .admin-pin-panel::before {
+      content: "🔐";
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      font-size: 100px;
+      opacity: 0.1;
+      transform: rotate(15deg);
+    }
+
+    .admin-pin-label {
+      color: var(--muted);
+      font-size: 14px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .admin-pin-number {
+      font-size: 64px;
+      font-weight: 800;
+      letter-spacing: 12px;
+      color: var(--accent2);
+      text-shadow: 0 0 30px rgba(34, 197, 94, 0.5);
+      font-family: monospace;
+      margin-bottom: 15px;
+      line-height: 1.2;
+    }
+
+    .admin-pin-info {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .admin-pin-info span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .admin-pin-share {
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 12px;
+      color: var(--secret);
+      font-size: 14px;
+      border: 1px dashed var(--secret);
+    }
+
+    .hacks-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+
+    .hack-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+      border-radius: 16px;
+      padding: 20px;
+      transition: 0.15s;
+    }
+
+    .hack-card:hover {
+      border-color: var(--accent2);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    }
+
+    .hack-card h3 {
+      margin: 0 0 10px 0;
+      color: var(--accent2);
+    }
+
+    .hack-card p {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0 0 15px 0;
+    }
+
+    .hack-toggle {
+      background: rgba(34, 197, 94, 0.2);
+      border: 1px solid var(--accent2);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      transition: 0.15s;
+    }
+
+    .hack-toggle.active {
+      background: var(--accent2);
+    }
+
+    .pin-status {
+      background: rgba(255, 215, 0, 0.1);
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 20px;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .pin-expiry {
+      color: var(--secret);
+      font-weight: 700;
+    }
+
+    .disable-pin-btn {
+      background: linear-gradient(135deg, #7C3AED, #22C55E);
+      border: none;
+      color: white;
+      padding: 15px 30px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 20px;
+      transition: 0.15s;
+    }
+
+    .disable-pin-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3);
+    }
+
+    .disable-pin-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .energy{
+      position:fixed;
+      inset:-2px;
+      pointer-events:none;
+      opacity:.55;
+      background:
+        repeating-linear-gradient(90deg, rgba(255,255,255,.04) 0 1px, transparent 1px 60px),
+        repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 1px, transparent 1px 60px);
+      mask-image: radial-gradient(circle at 50% 35%, black 0%, transparent 68%);
+      animation: drift 10s linear infinite;
+    }
+
+    @keyframes drift{
+      from{transform:translate3d(0,0,0)}
+      to{transform:translate3d(-60px, -60px, 0)}
+    }
+
+    header{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter: blur(12px);
+      background: linear-gradient(180deg, rgba(10,12,20,.82), rgba(10,12,20,.45));
+      border-bottom:1px solid rgba(255,255,255,.10);
+      margin-bottom: 20px;
+    }
+
+    .topbar{
+      max-width:1100px;
+      margin:0 auto;
+      padding:12px 16px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:700;
+      letter-spacing:.4px;
+    }
+
+    nav{
+      margin-left:auto;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .navbtn{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      padding:9px 12px;
+      border-radius:14px;
+      text-decoration:none;
+      font-weight:600;
+      font-size:14px;
+      transition:.15s ease;
+    }
+
+    .navbtn:hover{
+      transform: translateY(-1px);
+      border-color: color-mix(in oklab, var(--accent) 40%, rgba(255,255,255,.12));
+      box-shadow: 0 0 0 3px var(--ring);
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap:16px;
+      align-items:stretch;
+    }
+
+    .card{
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background: radial-gradient(800px 240px at 20% 0%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 60%),
+                  radial-gradient(800px 240px at 80% 0%, color-mix(in oklab, var(--accent2) 18%, transparent), transparent 60%);
+      opacity:.7;
+      pointer-events:none;
+    }
+
+    .card > *{position:relative; z-index:1}
+
+    .mainCard{
+      padding:22px;
+      min-height: 320px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .title{
+      margin:0;
+      font-size: clamp(34px, 4vw, 56px);
+      line-height:1.05;
+      letter-spacing:-.5px;
+    }
+
+    .searchMode {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      background: rgba(0,0,0,.25);
+      padding: 6px;
+      border-radius: 40px;
+      width: fit-content;
+      border: 1px solid rgba(255,255,255,.1);
+    }
+
+    .modeBtn {
+      padding: 8px 16px;
+      border-radius: 30px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all .15s ease;
+    }
+
+    .modeBtn.active {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 4px 12px rgba(124,58,237,.3);
+    }
+
+    .searchRow{
+      margin-top:8px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    .searchRow input{
+      flex:1;
+      padding: 14px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      outline:none;
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      font-size: 15px;
+    }
+
+    .go{
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: linear-gradient(135deg, color-mix(in oklab, var(--accent) 80%, #000), color-mix(in oklab, var(--accent2) 70%, #000));
+      color: white;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .quickGrid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:10px;
+    }
+
+    .tile{
+      padding:14px;
+      border-radius: 16px;
+      background: rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.12);
+      text-decoration:none;
+      color:var(--text);
+      transition:.15s ease;
+    }
+
+    .tile:hover{
+      transform: translateY(-2px);
+      border-color: color-mix(in oklab, var(--accent) 40%, rgba(255,255,255,.12));
+      box-shadow: 0 0 0 4px var(--ring);
+    }
+
+    .sideCard{
+      padding:18px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .badgeRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .badge{
+      padding:10px 12px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.22);
+      border:1px solid rgba(255,255,255,.12);
+      color: var(--muted);
+      font-size: 13px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .dot{
+      width:8px;height:8px;border-radius:50%;
+      background: var(--accent2);
+      box-shadow: 0 0 18px color-mix(in oklab, var(--accent2) 50%, transparent);
+    }
+
+    .bigNum{
+      font-size: 34px;
+      font-weight:800;
+      letter-spacing:-.5px;
+      color: var(--text);
+      margin-top:2px;
+    }
+  </style>
 </head>
 <body>
-    <h1>📚 Homework Helper</h1>
-    
-    <div class="mode-selector">
-        <button class="mode-btn active" id="normalMode">🔍 Normal</button>
-        <button class="mode-btn" id="proxyMode">🛡️ Proxy</button>
-    </div>
-    
-    <div class="box">
-        <input id="url" placeholder="Enter website (e.g., google.com)">
-        <button onclick="go()">Go</button>
-    </div>
-    
-    <iframe id="frame"></iframe>
-    
-    <div class="note" id="status">Ready</div>
+  <div class="energy"></div>
 
-    <script>
-        let mode = 'normal';
-        
-        // Mode buttons
-        document.getElementById('normalMode').addEventListener('click', () => {
-            mode = 'normal';
-            document.getElementById('normalMode').classList.add('active');
-            document.getElementById('proxyMode').classList.remove('active');
-            document.getElementById('status').textContent = 'Normal mode - opens in new tab';
-        });
-        
-        document.getElementById('proxyMode').addEventListener('click', () => {
-            mode = 'proxy';
-            document.getElementById('proxyMode').classList.add('active');
-            document.getElementById('normalMode').classList.remove('active');
-            document.getElementById('status').textContent = 'Proxy mode - loads in iframe';
-        });
-        
-        // Main function
-        async function go() {
-            let input = document.getElementById('url').value;
-            if (!input) return;
-            
-            // Format URL
-            if (!input.startsWith('http')) {
-                input = 'https://' + input;
-            }
-            
-            if (mode === 'normal') {
-                // Normal mode - open in new tab
-                window.open(input, '_blank');
-            } else {
-                // Proxy mode - load through our proxy
-                let frame = document.getElementById('frame');
-                frame.style.display = 'block';
-                document.getElementById('status').textContent = 'Loading...';
-                
-                try {
-                    // Use a CORS proxy to fetch the site
-                    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(input);
-                    
-                    // Alternative proxies (if one fails)
-                    const proxies = [
-                        'https://api.allorigins.win/raw?url=',
-                        'https://corsproxy.io/?',
-                        'https://thingproxy.freeboard.io/fetch/'
-                    ];
-                    
-                    // Try each proxy until one works
-                    for (let p of proxies) {
-                        try {
-                            let response = await fetch(p + encodeURIComponent(input));
-                            if (response.ok) {
-                                let html = await response.text();
-                                frame.srcdoc = html;
-                                document.getElementById('status').textContent = 'Loaded via proxy';
-                                return;
-                            }
-                        } catch (e) {
-                            console.log('Proxy failed:', p);
-                        }
-                    }
-                    
-                    // If all proxies fail, show error
-                    frame.srcdoc = '<html><body style="padding:20px">Error: Could not load site. Try another URL.</body></html>';
-                    document.getElementById('status').textContent = 'Failed to load';
-                    
-                } catch (error) {
-                    frame.srcdoc = '<html><body style="padding:20px">Error: ' + error.message + '</body></html>';
-                    document.getElementById('status').textContent = 'Error';
-                }
-            }
+  <div class="app-container">
+    <!-- LEFT SIDE - Main Voltify Content -->
+    <div class="main-content">
+      <header>
+        <div class="topbar">
+          <div class="brand">
+            <img src="logo.png" alt="Voltify Logo" style="width:34px;height:34px;border-radius:12px;">
+            <div>Voltify</div>
+          </div>
+          <nav>
+            <a class="navbtn" href="index.html">Home</a>
+            <a class="navbtn" href="games.html">Games</a>
+            <a class="navbtn" href="movies.html">Movies</a>
+            <a class="navbtn" href="#" id="openSettings">Settings</a>
+          </nav>
+        </div>
+      </header>
+
+      <div class="wrap">
+        <section class="hero">
+          <div class="card">
+            <div class="mainCard">
+              <h1 class="title">Voltify⚡</h1>
+              <p class="subtitle">Games, Movies, And Proxies Made For You.</p>
+
+              <div class="searchMode">
+                <button class="modeBtn active" id="normalMode">🔍 Normal Search</button>
+                <button class="modeBtn" id="proxyMode">🛡️ Proxy Mode</button>
+              </div>
+
+              <div class="searchRow">
+                <input id="searchInput" placeholder="Search Google or type a URL..." autocomplete="off" />
+                <button class="go" id="goBtn">Go</button>
+              </div>
+
+              <div class="quickGrid">
+                <a class="tile" href="games.html">
+                  <b>🎮 Games</b>
+                  <small>Play your stuff</small>
+                </a>
+                <a class="tile" href="movies.html">
+                  <b>🎬 Movies</b>
+                  <small>Watch your films</small>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="sideCard">
+              <div class="badgeRow">
+                <div class="badge"><span class="dot"></span><span id="timeText">--:--</span></div>
+                <div class="badge">Visitors: <b id="visitorCount">--</b></div>
+              </div>
+              <div style="margin-top:6px;color:var(--muted);font-weight:600;">Status</div>
+              <div class="bigNum" id="statusText">Active!</div>
+              <div class="smallNote">
+                Tip: Don't Introduce The Site By Saying "Check Out (My Name)'s Site! Please say Voltify
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE - Secret PIN Pad -->
+    <div class="secret-sidebar">
+      <div class="pin-header">⚡ SECRET ACCESS ⚡</div>
+      <div class="pin-display" id="pinDisplay">••••••</div>
+      
+      <div class="pin-grid">
+        <button class="pin-btn" onclick="addPinDigit('1')">1</button>
+        <button class="pin-btn" onclick="addPinDigit('2')">2</button>
+        <button class="pin-btn" onclick="addPinDigit('3')">3</button>
+        <button class="pin-btn" onclick="addPinDigit('4')">4</button>
+        <button class="pin-btn" onclick="addPinDigit('5')">5</button>
+        <button class="pin-btn" onclick="addPinDigit('6')">6</button>
+        <button class="pin-btn" onclick="addPinDigit('7')">7</button>
+        <button class="pin-btn" onclick="addPinDigit('8')">8</button>
+        <button class="pin-btn" onclick="addPinDigit('9')">9</button>
+        <button class="pin-btn" onclick="addPinDigit('*')">*</button>
+        <button class="pin-btn" onclick="addPinDigit('0')">0</button>
+        <button class="pin-btn" onclick="addPinDigit('#')">#</button>
+      </div>
+
+      <div class="pin-actions">
+        <button class="pin-action-btn clear" onclick="clearPin()">Clear</button>
+        <button class="pin-action-btn" onclick="submitPin()">Enter</button>
+      </div>
+
+      <div class="pin-status" id="pinStatus">
+        <div>Current PIN: <span id="currentPinDisplay">------</span></div>
+        <div class="pin-expiry" id="expiryDisplay"></div>
+      </div>
+
+      <button class="disable-pin-btn" id="disablePinBtn" onclick="togglePinProtection()" disabled>
+        🔓 Disable PIN Protection
+      </button>
+    </div>
+  </div>
+
+  <!-- Blooket Hacks UI - With Admin PIN Display -->
+  <div class="blooket-ui" id="blooketUI">
+    <div class="blooket-header">
+      <h2>🎮 BLOOKET HACKS v2.0</h2>
+      <button class="close-blooket" onclick="closeBlooketUI()">✕</button>
+    </div>
+    
+    <!-- ADMIN PANEL - Current PIN Display (Only visible to you) -->
+    <div class="admin-pin-panel">
+      <div class="admin-pin-label">🔐 CURRENT BI-WEEKLY PIN</div>
+      <div class="admin-pin-number" id="adminPinDisplay">------</div>
+      
+      <div class="admin-pin-info">
+        <span>🔄 Updates every 14 days</span>
+        <span>⏳ Expires in <span id="adminExpiryDisplay">--</span> days</span>
+      </div>
+      
+      <div class="admin-pin-share">
+        ⚡ Share this PIN for Blooket hacks access! ⚡
+      </div>
+    </div>
+    
+    <div class="hacks-grid">
+      <div class="hack-card">
+        <h3>⚡ Infinite Coins</h3>
+        <p>Add unlimited coins to your account</p>
+        <button class="hack-toggle" onclick="toggleHack(this, 'coins')">Activate</button>
+      </div>
+      <div class="hack-card">
+        <h3>🎯 Auto Answer</h3>
+        <p>Automatically answer questions correctly</p>
+        <button class="hack-toggle" onclick="toggleHack(this, 'autoanswer')">Activate</button>
+      </div>
+      <div class="hack-card">
+        <h3>⚔️ All Blooks Unlocked</h3>
+        <p>Get every Blook in the game</p>
+        <button class="hack-toggle" onclick="toggleHack(this, 'blooks')">Activate</button>
+      </div>
+      <div class="hack-card">
+        <h3>📊 Score Multiplier</h3>
+        <p>Multiply your score by 10x</p>
+        <button class="hack-toggle" onclick="toggleHack(this, 'multiplier')">Activate</button>
+      </div>
+      <div class="hack-card">
+        <h3>⏱️ Unlimited Time</h3>
+        <p>Never run out of time in games</p>
+        <button class="hack-toggle" onclick="toggleHack(this, 'time')">Activate</button>
+      </div>
+      <div class="hack-card">
+        <h3>👑 Host Controls</h3>
+        <p>Take control of any game</p>
+        <button class="hack-toggle" onclick="toggleHack(this, 'host')">Activate</button>
+      </div>
+    </div>
+
+    <div style="text-align: center; color: var(--muted); font-size: 12px;">
+      ⚡ Use responsibly - these hacks are for educational purposes only ⚡
+    </div>
+  </div>
+
+  <script>
+    // ========== SECRET PIN SYSTEM ==========
+    let currentPin = '';
+    let pinEnabled = true;
+    const ADMIN_PIN = '091202';
+    
+    // Generate bi-weekly PIN
+    function generateBiWeeklyPin() {
+      const now = new Date();
+      const twoWeekPeriod = Math.floor(now.getTime() / (14 * 24 * 60 * 60 * 1000));
+      const pinSeed = (twoWeekPeriod * 12345).toString();
+      return pinSeed.slice(-6).padStart(6, '0');
+    }
+    
+    function updatePinDisplay() {
+      const biWeeklyPin = generateBiWeeklyPin();
+      document.getElementById('currentPinDisplay').textContent = biWeeklyPin;
+      
+      // Calculate expiry date
+      const now = new Date();
+      const daysUntilExpiry = 14 - (now.getDate() % 14);
+      document.getElementById('expiryDisplay').textContent = 
+        `Expires in ${daysUntilExpiry} days`;
+    }
+    
+    function updateAdminPinDisplay() {
+      const biWeeklyPin = generateBiWeeklyPin();
+      const adminDisplay = document.getElementById('adminPinDisplay');
+      const adminExpiry = document.getElementById('adminExpiryDisplay');
+      
+      if (adminDisplay) {
+        adminDisplay.textContent = biWeeklyPin;
+      }
+      
+      if (adminExpiry) {
+        const now = new Date();
+        const daysUntilExpiry = 14 - (now.getDate() % 14);
+        adminExpiry.textContent = daysUntilExpiry;
+      }
+    }
+    
+    function addPinDigit(digit) {
+      if (currentPin.length < 6) {
+        currentPin += digit;
+        updatePinDisplayField();
+      }
+    }
+    
+    function clearPin() {
+      currentPin = '';
+      updatePinDisplayField();
+    }
+    
+    function updatePinDisplayField() {
+      const display = document.getElementById('pinDisplay');
+      display.textContent = currentPin.padEnd(6, '•');
+    }
+    
+    function submitPin() {
+      const biWeeklyPin = generateBiWeeklyPin();
+      
+      if (currentPin === ADMIN_PIN) {
+        // Admin PIN - opens Blooket UI
+        document.getElementById('blooketUI').style.display = 'block';
+        updateAdminPinDisplay();
+        document.getElementById('disablePinBtn').disabled = false;
+        currentPin = '';
+        updatePinDisplayField();
+        showStatus('Admin access granted! 🔓', 'success');
+      } else if (currentPin === biWeeklyPin) {
+        // User PIN - just show message
+        showStatus('Correct PIN! Check back for Blooket hacks soon! 🎮', 'success');
+        currentPin = '';
+        updatePinDisplayField();
+      } else {
+        // Wrong PIN
+        showStatus('Invalid PIN! Try again.', 'error');
+        currentPin = '';
+        updatePinDisplayField();
+      }
+    }
+    
+    function showStatus(message, type) {
+      const statusEl = document.getElementById('pinStatus');
+      const originalHTML = statusEl.innerHTML;
+      statusEl.innerHTML = `<div style="color: ${type === 'success' ? '#22C55E' : '#FF6B6B'}">${message}</div>`;
+      setTimeout(() => {
+        statusEl.innerHTML = originalHTML;
+        updatePinDisplay();
+      }, 2000);
+    }
+    
+    function togglePinProtection() {
+      pinEnabled = !pinEnabled;
+      const btn = document.getElementById('disablePinBtn');
+      if (!pinEnabled) {
+        btn.textContent = '🔒 Enable PIN Protection';
+        btn.style.background = 'linear-gradient(135deg, #FF6B6B, #7C3AED)';
+        showStatus('PIN protection disabled', 'success');
+      } else {
+        btn.textContent = '🔓 Disable PIN Protection';
+        btn.style.background = 'linear-gradient(135deg, #7C3AED, #22C55E)';
+        showStatus('PIN protection enabled', 'success');
+      }
+    }
+    
+    function closeBlooketUI() {
+      document.getElementById('blooketUI').style.display = 'none';
+    }
+    
+    function toggleHack(btn, hackName) {
+      btn.classList.toggle('active');
+      btn.textContent = btn.classList.contains('active') ? 'Deactivate' : 'Activate';
+      showStatus(`${hackName} hack ${btn.classList.contains('active') ? 'activated' : 'deactivated'}!`, 'success');
+    }
+    
+    // ========== PROXY MODE ==========
+    let searchMode = 'normal';
+    const normalBtn = document.getElementById('normalMode');
+    const proxyBtn = document.getElementById('proxyMode');
+    const searchInput = document.getElementById('searchInput');
+    const goBtn = document.getElementById('goBtn');
+    
+    normalBtn.addEventListener('click', () => {
+      searchMode = 'normal';
+      normalBtn.classList.add('active');
+      proxyBtn.classList.remove('active');
+      searchInput.placeholder = 'Search Google or type a URL...';
+    });
+    
+    proxyBtn.addEventListener('click', () => {
+      searchMode = 'proxy';
+      proxyBtn.classList.add('active');
+      normalBtn.classList.remove('active');
+      searchInput.placeholder = 'Enter site to proxy (e.g., google.com)';
+    });
+    
+    function runSearch() {
+      const q = searchInput.value.trim();
+      if (!q) return;
+      
+      if (searchMode === 'normal') {
+        const looksLikeUrl = q.includes('.') && !q.includes(' ') && !q.startsWith('?');
+        const url = looksLikeUrl
+          ? (q.startsWith('http') ? q : 'https://' + q)
+          : 'https://www.google.com/search?q=' + encodeURIComponent(q);
+        window.open(url, '_blank', 'noopener');
+      } else {
+        let proxyUrl = q;
+        if (!proxyUrl.startsWith('http://') && !proxyUrl.startsWith('https://')) {
+          proxyUrl = 'https://' + proxyUrl;
         }
-        
-        // Enter key
-        document.getElementById('url').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') go();
-        });
-    </script>
+        window.open('https://homework-helper.fly.dev/?url=' + encodeURIComponent(proxyUrl), '_blank', 'noopener');
+      }
+    }
+    
+    goBtn.addEventListener('click', runSearch);
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') runSearch();
+    });
+    
+    // ========== TIME ==========
+    function updateTime(){
+      const d = new Date();
+      let h = d.getHours();
+      const m = String(d.getMinutes()).padStart(2,'0');
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12; if (h === 0) h = 12;
+      document.getElementById('timeText').textContent = `${h}:${m} ${ampm}`;
+    }
+    updateTime();
+    setInterval(updateTime, 1000);
+    
+    // ========== VISITOR COUNTER ==========
+    function localCount(){
+      const k = 'voltify_local_visits';
+      const v = Number(localStorage.getItem(k) || '0') + 1;
+      localStorage.setItem(k, String(v));
+      return v;
+    }
+    
+    async function updateVisitorCount(){
+      const el = document.getElementById('visitorCount');
+      try{
+        const url = `https://api.countapi.xyz/hit/voltify-${Math.random()}/home`;
+        const r = await fetch(url, { cache:'no-store' });
+        if (!r.ok) throw new Error();
+        const data = await r.json();
+        el.textContent = data.value.toLocaleString();
+      } catch {
+        el.textContent = localCount().toLocaleString();
+      }
+    }
+    updateVisitorCount();
+    
+    // Initialize
+    updatePinDisplay();
+    setInterval(updatePinDisplay, 1000 * 60 * 60); // Update every hour
+    setInterval(updateAdminPinDisplay, 1000 * 60 * 60); // Update admin display every hour
+  </script>
 </body>
 </html>
