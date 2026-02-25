@@ -3,8 +3,8 @@
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'voltify'
-primary_region = 'ams'
+app = 'math-tools'
+primary_region = 'lax'
 
 [build]
 
